@@ -1,0 +1,100 @@
+🃏 Revision Card: Fruit Into Baskets
+📌 Problem
+
+You are given an array fruits, where fruits[i] is the type of fruit on the i-th tree.
+
+You have 2 baskets → each basket can hold only one type of fruit (but unlimited quantity).
+
+Starting from any tree, moving only to the right, you must pick exactly one fruit from each tree until you encounter a third type of fruit.
+
+Return the maximum number of fruits you can pick.
+
+Example:
+
+Input: fruits = [1,2,1,2,3]
+Output: 4
+Explanation: We can take [1,2,1,2] before a 3 appears.
+
+🔹 Approach 1: Brute Force (O(n²))
+
+Try every starting point.
+
+Use a set or map to track fruit types.
+
+Expand right until > 2 types.
+
+Track max length.
+
+int totalFruit(vector<int>& fruits) {
+    int n = fruits.size(), ans = 0;
+    for (int i = 0; i < n; i++) {
+        unordered_map<int,int> count;
+        for (int j = i; j < n; j++) {
+            count[fruits[j]]++;
+            if (count.size() > 2) break;
+            ans = max(ans, j - i + 1);
+        }
+    }
+    return ans;
+}
+
+🔹 Approach 2: Sliding Window with Map (O(n))
+
+Maintain a window with ≤ 2 fruit types.
+
+Use a hashmap for counts.
+
+Expand right, shrink left if > 2 types.
+
+int totalFruit(vector<int>& fruits) {
+    unordered_map<int,int> count;
+    int l = 0, ans = 0;
+    for (int r = 0; r < fruits.size(); r++) {
+        count[fruits[r]]++;
+        while (count.size() > 2) {
+            count[fruits[l]]--;
+            if (count[fruits[l]] == 0) count.erase(fruits[l]);
+            l++;
+        }
+        ans = max(ans, r - l + 1);
+    }
+    return ans;
+}
+
+🔹 Approach 3: Optimal (Track Last Two Types, O(n), O(1))
+
+Keep only two variables for last two fruit types.
+
+Maintain streak of last fruit and current window size.
+
+If a new third type appears → reset window to lastFruitStreak + 1.
+
+int totalFruit(vector<int>& fruits) {
+    int last = -1, secondLast = -1;
+    int lastStreak = 0, currCount = 0, maxlen = 0;
+
+    for (int fruit : fruits) {
+        if (fruit == last || fruit == secondLast) {
+            currCount++;
+        } else {
+            currCount = lastStreak + 1;
+        }
+
+        if (fruit == last) {
+            lastStreak++;
+        } else {
+            lastStreak = 1;
+            secondLast = last;
+            last = fruit;
+        }
+
+        maxlen = max(maxlen, currCount);
+    }
+    return maxlen;
+}
+
+🎯 Summary Table
+Approach	Idea	Time	Space	Usefulness
+Brute Force	Try all start points	O(n²)	O(n)	Only for basics
+Sliding Window + Map	Maintain ≤ 2 types	O(n)	O(2) ~ O(1)	✅ Best interview answer
+Optimal (2 types tracking)	Track only last 2 types	O(n)	O(1)	✅ Smart trick
