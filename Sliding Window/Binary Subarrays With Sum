@@ -1,0 +1,125 @@
+🃏 Revision Card: Binary Subarrays With Sum (Leetcode 930)
+📌 Problem
+
+You are given a binary array nums (only 0 and 1) and an integer goal.
+Return the number of non-empty subarrays with sum exactly equal to goal.
+
+Example:
+
+Input: nums = [1,0,1,0,1], goal = 2  
+Output: 4  
+
+Explanation: The 4 valid subarrays are:  
+[1,0,1] (from index 0 to 2)  
+[0,1,0,1] (from index 1 to 4)  
+[1,0,1] (from index 2 to 4)  
+[1,0,1] (from index 0 to 4, but only first 3 elements)
+
+🔹 Approach 1: Brute Force (O(n²))
+
+Generate all subarrays, calculate sum, check if equal to goal.
+
+Works for small arrays but too slow.
+
+int numSubarraysWithSum(vector<int>& nums, int goal) {
+    int n = nums.size(), ans = 0;
+    for (int i = 0; i < n; i++) {
+        int sum = 0;
+        for (int j = i; j < n; j++) {
+            sum += nums[j];
+            if (sum == goal) ans++;
+        }
+    }
+    return ans;
+}
+
+🔹 Approach 2: Prefix Sum + HashMap (O(n)) ✅
+
+Maintain prefix sum = sum of elements up to index i.
+
+If prefix[j] - prefix[i] = goal, then subarray (i+1 … j) has sum = goal.
+
+Use a hashmap to store how many times each prefix sum has appeared.
+
+int numSubarraysWithSum(vector<int>& nums, int goal) {
+    unordered_map<int,int> mp;
+    mp[0] = 1;  // base case
+    int prefix = 0, ans = 0;
+    
+    for (int x : nums) {
+        prefix += x;
+        if (mp.count(prefix - goal)) ans += mp[prefix - goal];
+        mp[prefix]++;
+    }
+    return ans;
+}
+
+
+Time: O(n)
+
+Space: O(n)
+
+👉 Standard solution, but requires a hashmap.
+
+🔹 Approach 3: Sliding Window (AtMost Trick, O(n)) ✅
+
+Idea:
+
+Let f(x) = number of subarrays with sum ≤ x.
+
+Then, subarrays with sum = goal =
+
+f(goal) - f(goal-1)
+
+Implementation
+int atMost(vector<int>& nums, int goal) {
+    if (goal < 0) return 0; // no subarray possible
+    int l = 0, sum = 0, ans = 0;
+    for (int r = 0; r < nums.size(); r++) {
+        sum += nums[r];
+        while (sum > goal) {
+            sum -= nums[l];
+            l++;
+        }
+        ans += (r - l + 1); // all subarrays ending at r
+    }
+    return ans;
+}
+
+int numSubarraysWithSum(vector<int>& nums, int goal) {
+    return atMost(nums, goal) - atMost(nums, goal - 1);
+}
+
+
+Time: O(n)
+
+Space: O(1)
+
+👉 Very elegant, no extra memory needed.
+
+🔹 Dry Run of Sliding Window (nums = [1,0,1,0,1], goal=2)
+Step 1: Compute f(2) = subarrays with sum ≤ 2
+r	nums[r]	Window (l…r)	sum	Valid subarrays ending at r	Count
+0	1	[1]	1	[1]	+1
+1	0	[1,0]	1	[0], [1,0]	+2
+2	1	[1,0,1]	2	[1], [0,1], [1,0,1]	+3
+3	0	[1,0,1,0]	2	[0], [1,0], [0,1,0], [1,0,1,0]	+4
+4	1	[1,0,1,0,1]	3 → shrink → [0,1,0,1], sum=2	[1], [0,1], [1,0,1], [0,1,0,1]	+4
+
+👉 f(2) = 1+2+3+4+4 = 14
+
+Step 2: Compute f(1) = subarrays with sum ≤ 1
+
+By similar process, f(1) = 10
+
+Step 3: Answer
+f(2) - f(1) = 14 - 10 = 4
+
+
+✅ Matches expected output.
+
+🎯 Summary
+Approach	Idea	Time	Space	Usefulness
+Brute Force	Try all subarrays	O(n²)	O(1)	Basics only
+Prefix Sum + Map	Store prefix sums	O(n)	O(n)	Clean & intuitive
+Sliding Window (AtMost)	f(goal) - f(goal-1)	O(n)	O(1)	✅ Most optimal
