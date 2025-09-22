@@ -1,0 +1,87 @@
+🃏 Revision Card: Count Number of Nice Subarrays
+📌 Problem
+
+Given an integer array nums and an integer k, return the number of subarrays with exactly k odd numbers.
+
+Example:
+
+Input: nums = [1,1,2,1,1], k = 3  
+Output: 2  
+Explanation: Subarrays [1,1,2,1] and [1,2,1,1] have exactly 3 odd numbers.
+
+🔹 Approach 1: Brute Force (O(n²))
+
+For each subarray, count number of odds.
+
+If exactly k, increase answer.
+
+int numberOfSubarrays(vector<int>& nums, int k) {
+    int n = nums.size(), ans = 0;
+    for (int i = 0; i < n; i++) {
+        int cnt = 0;
+        for (int j = i; j < n; j++) {
+            if (nums[j] % 2) cnt++;
+            if (cnt == k) ans++;
+            else if (cnt > k) break;
+        }
+    }
+    return ans;
+}
+
+🔹 Approach 2: Prefix Sum + HashMap (O(n))
+
+Convert array into 0 (even) and 1 (odd).
+
+Maintain prefix sum of odd counts.
+
+For each index, if prefix[i] - k exists in map, add its frequency.
+
+int numberOfSubarrays(vector<int>& nums, int k) {
+    unordered_map<int,int> mp;
+    mp[0] = 1;
+    int prefix = 0, ans = 0;
+    
+    for (int x : nums) {
+        prefix += (x % 2); // count odds
+        if (mp.count(prefix - k)) ans += mp[prefix - k];
+        mp[prefix]++;
+    }
+    return ans;
+}
+
+🔹 Approach 3: Sliding Window (AtMost Trick, O(n)) ✅
+
+Define function f(k) = number of subarrays with at most k odds.
+
+Answer = f(k) - f(k-1) → gives exactly k odds.
+
+int atMost(vector<int>& nums, int k) {
+    int l = 0, cnt = 0, ans = 0;
+    for (int r = 0; r < nums.size(); r++) {
+        if (nums[r] % 2) k--;
+        while (k < 0) {
+            if (nums[l] % 2) k++;
+            l++;
+        }
+        ans += r - l + 1;
+    }
+    return ans;
+}
+
+int numberOfSubarrays(vector<int>& nums, int k) {
+    return atMost(nums, k) - atMost(nums, k-1);
+}
+
+🎯 Key Insights
+
+Prefix Sum Method → count subarrays ending at each index.
+
+Sliding Window (AtMost) → powerful trick: exactly K = atMost(K) - atMost(K-1).
+
+Both are O(n), but sliding window is usually cleaner in interviews.
+
+📌 Summary
+Approach	Idea	Time	Space	Usefulness
+Brute Force	Count odds for each subarray	O(n²)	O(1)	Basic only
+Prefix Sum + Map	Count prefix sums	O(n)	O(n)	Standard & clean
+Sliding Window (AtMost)	f(k) - f(k-1)	O(n)	O(1)	✅ Most optimal
