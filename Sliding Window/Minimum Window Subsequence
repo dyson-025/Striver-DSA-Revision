@@ -1,0 +1,104 @@
+📝 Minimum Window Subsequence — Quick Revision
+🔎 Problem: https://www.geeksforgeeks.org/problems/minimum-window-subsequence/1
+
+Find the shortest substring of s1 such that s2 is a subsequence of it.
+If none exists, return "".
+
+1️⃣ Brute Force (Restart Every Index)
+
+Idea
+
+For each i where s1[i] == s2[0]:
+
+Expand forward until s2 fully matched.
+
+Shrink backward to get minimal window.
+
+Track shortest window.
+
+Code
+
+string minWindow(string& s1, string& s2) {
+    int n = s1.size(), m = s2.size();
+    int bestStart = -1, bestLen = INT_MAX;
+
+    for (int i = 0; i < n; i++) {
+        if (s1[i] != s2[0]) continue;
+        int j = 0, end = i;
+        while (end < n && j < m) {
+            if (s1[end] == s2[j]) j++;
+            end++;
+        }
+        if (j < m) continue;
+        int right = end - 1, left = right; j = m - 1;
+        while (j >= 0) {
+            if (s1[left] == s2[j]) j--;
+            left--;
+        }
+        ++left;
+        if (right - left + 1 < bestLen) {
+            bestLen = right - left + 1;
+            bestStart = left;
+        }
+    }
+    return bestStart == -1 ? "" : s1.substr(bestStart, bestLen);
+}
+
+
+Complexity
+
+Time: O(n²·m) (restarts at every index)
+
+Space: O(1)
+
+2️⃣ Optimal Two-Pointer (Forward + Backward Once)
+
+Idea
+
+One continuous scan with i (s1) and j (s2).
+
+When s2 fully matched, shrink backward to get minimal window.
+
+Continue forward (don’t restart at each index).
+
+Code
+
+string minWindow(string& s1, string& s2) {
+    int n = s1.size(), m = s2.size();
+    int bestStart = -1, bestLen = INT_MAX;
+    int i = 0, j = 0;
+
+    while (i < n) {
+        if (s1[i] == s2[j]) {
+            j++;
+            if (j == m) {
+                int end = i; j = m - 1;
+                while (j >= 0) {
+                    if (s1[i] == s2[j]) j--;
+                    i--;
+                }
+                i++; j++;
+                if (end - i + 1 < bestLen) {
+                    bestLen = end - i + 1;
+                    bestStart = i;
+                }
+            }
+        }
+        i++;
+    }
+    return bestStart == -1 ? "" : s1.substr(bestStart, bestLen);
+}
+
+
+Complexity
+
+Time: O(n·m) (each char visited ≤2 times)
+
+Space: O(1)
+
+⚖️ Comparison
+Approach	Time	Space	Note
+Brute Force	O(n²·m)	O(1)	Restarts at every index
+Two-Pointer	O(n·m)	O(1)	Continuous scan, optimal way
+
+✅ Key takeaway: The only difference is whether you restart at every index (brute) or reuse progress in one continuous scan (optimal).
