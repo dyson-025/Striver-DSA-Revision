@@ -1,5 +1,5 @@
 🃏 Revision Card: Binary Subarrays With Sum (Leetcode 930)
-📌 Problem
+📌 Problem: https://leetcode.com/problems/binary-subarrays-with-sum/
 
 You are given a binary array nums (only 0 and 1) and an integer goal.
 Return the number of non-empty subarrays with sum exactly equal to goal.
