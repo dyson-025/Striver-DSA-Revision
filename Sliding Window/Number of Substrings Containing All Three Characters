@@ -1,0 +1,126 @@
+📝 Revision Card: Number of Substrings Containing All Three Characters
+🔹 Problem link: https://leetcode.com/problems/number-of-substrings-containing-all-three-characters/
+
+You are given a string s consisting only of 'a', 'b', and 'c'.
+Return the number of substrings that contain at least one 'a', one 'b', and one 'c'.
+
+✅ Approach 1: Better Approach (O(n²))
+🔸 Intuition
+
+Fix a starting point i.
+
+Extend the substring towards the right (j from i to n-1).
+
+Track counts of 'a','b','c'.
+
+The first time you find all three → every longer substring starting at i will also contain all three.
+
+So you can add (n - j) to the answer and break (no need to go further for that i).
+
+🔸 Example Walkthrough ("abcabc")
+
+Start at i=0:
+
+j=0 → "a" (not valid),
+
+j=1 → "ab" (not valid),
+
+j=2 → "abc" ✅ → add (6-2)=4.
+
+Start at i=1:
+
+j=1 → "b",
+
+j=2 → "bc",
+
+j=3 → "bca" ✅ → add (6-3)=3.
+
+Continue similarly → total = 10.
+
+🔸 Code
+int numberOfSubstrings(string s) {
+    int n = s.size(), ans = 0;
+    for (int i = 0; i < n; i++) {
+        int cnt[3] = {0, 0, 0};
+        for (int j = i; j < n; j++) {
+            cnt[s[j]-'a']++;
+            if (cnt[0] && cnt[1] && cnt[2]) {
+                ans += (n - j);
+                break;
+            }
+        }
+    }
+    return ans;
+}
+
+🔸 Complexity
+
+Outer loop = n.
+
+Inner loop = up to n.
+
+But breaks early when valid substring found → much faster than naive.
+
+Time: O(n²) worst-case.
+
+Space: O(1).
+
+✅ Approach 2: Last Occurrence Trick (Optimal O(n))
+🔸 Intuition
+
+Think in terms of ending index of a substring.
+
+For substring ending at i, when do we know it’s valid?
+→ When all three chars 'a','b','c' have appeared before or at i.
+
+The earliest valid start is just after the minimum of the last seen indices of 'a','b','c'.
+
+So the number of valid substrings ending at i = min(lastA, lastB, lastC) + 1.
+
+🔸 Example Walkthrough ("abcabc")
+
+At i=0 → "a" → not valid.
+
+At i=1 → "ab" → not valid.
+
+At i=2 → "abc" → last = [0,1,2] → min=0 → add 0+1=1.
+
+At i=3 → "abca" → last = [3,1,2] → min=1 → add 1+1=2.
+
+At i=4 → "abcab" → last = [3,4,2] → min=2 → add 2+1=3.
+
+At i=5 → "abcabc" → last = [3,4,5] → min=3 → add 3+1=4.
+
+Total = 10 ✅.
+
+🔸 Code
+int numberOfSubstrings(string s) {
+    vector<int> last(3, -1);  // last indices of a,b,c
+    int ans = 0;
+    for (int i = 0; i < s.size(); i++) {
+        last[s[i]-'a'] = i;
+        if (last[0] != -1 && last[1] != -1 && last[2] != -1)
+            ans += 1 + min({last[0], last[1], last[2]});
+    }
+    return ans;
+}
+
+🔸 Complexity
+
+Single pass → O(n).
+
+Only 3 indices tracked → O(1) space.
+
+🔹 Complexity Comparison
+Approach	Time Complexity	Space Complexity	Notes
+O(n²) Better	O(n²)	O(1)	Good for explaining step by step
+Last Occurrence Trick	O(n)	O(1)	Elegant & Optimal
+⚡ Interview Tips
+
+Always start with O(n²) (easy to derive).
+
+Then say: “But we can do better by focusing on the last occurrence of each character.”
+
+End with the optimal O(n) solution.
+
+If time, do a dry run on "abcabc" to impress.
