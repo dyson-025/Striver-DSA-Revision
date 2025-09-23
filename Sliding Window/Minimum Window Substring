@@ -1,0 +1,134 @@
+📌 Minimum Window Substring (Leetcode 76)
+🔹 Problem : https://leetcode.com/problems/minimum-window-substring/
+
+Given two strings s and t, return the smallest substring of s that contains all characters of t (with duplicates).
+If no such substring exists, return "".
+
+🔹 Brute Force Approach
+Idea
+
+Generate all substrings of s.
+
+For each substring, check if it contains all chars of t.
+
+Keep track of smallest valid substring.
+
+Example
+
+s = "ADOBECODEBANC", t = "ABC"
+
+Substrings: "A", "AD", "ADO", ... "ADOBECODEBANC".
+
+Check each → only "ADOBEC" is valid among first few.
+
+Track minimum = "BANC".
+
+Complexity
+
+Generate substrings → O(n²).
+
+Check each substring against t → O(n).
+
+Total: O(n³).
+
+Space: O(1).
+
+🚨 Too slow for large inputs.
+
+🔹 Optimal Approach (Sliding Window + Hashmap)
+
+Your code is the standard optimal version. Let’s deeply break it down.
+
+Code (Your Version, Annotated)
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        int l = 0, r = 0;        // sliding window [l..r]
+        int sid = -1;            // start index of best window
+        int ml = INT_MAX;        // min length found
+        int cnt = 0;             // how many chars from t matched
+
+        unordered_map<char,int> mpp;
+        for(char c : t) mpp[c]++;   // freq map for t
+
+        while(r < s.size()) {
+            if(mpp[s[r]] > 0) cnt++;   // found a needed char
+            mpp[s[r]]--;               // decrease freq (even if not needed)
+
+            // shrink window if all chars matched
+            while(cnt == t.size()) {
+                if(r - l + 1 < ml) {   // update answer
+                    sid = l;
+                    ml = r - l + 1;
+                }
+
+                mpp[s[l]]++;           // put back left char
+                if(mpp[s[l]] > 0) cnt--; // lost a needed char
+                l++;                    // shrink window
+            }
+            r++;
+        }
+        return sid == -1 ? "" : s.substr(sid, ml);
+    }
+};
+
+Step-by-Step Intuition
+
+Build freq map (mpp)
+Example: t = "ABC" → {A:1, B:1, C:1}
+
+Expand window (r)
+
+For each char, decrement its freq in mpp.
+
+If it was needed (mpp[s[r]] > 0 before decrement), increase cnt.
+
+Check valid window
+
+When cnt == t.size(), means all chars matched.
+
+Shrink from left (l)
+
+Try to minimize window length.
+
+Restore freq when moving l.
+
+If some char goes missing (mpp[s[l]] > 0 after restore), reduce cnt.
+
+Update answer
+
+Track smallest window with (sid, ml).
+
+Example Walkthrough
+
+s = "ADOBECODEBANC", t = "ABC"
+
+Start: mpp = {A:1, B:1, C:1}, l=0, r=0, cnt=0
+
+r=0 → "A" → needed → cnt=1
+
+r=1..4 → "ADOBE" → cnt=2 (A,B found)
+
+r=5 → "ADOBEC" → cnt=3 ✅ valid window
+
+Shrink from l=0 → "DOBEC" (valid, len=5)
+
+Keep shrinking → best window "BANC"
+
+Final Answer = "BANC"
+
+Complexity
+
+Each char enters and leaves window at most once → O(n).
+
+Hashmap operations → O(1).
+
+Time: O(n + m).
+
+Space: O(k), k = unique chars in t.
+
+🔑 Key Differences From Brute Force
+Brute Force	Optimal (Your Code)
+Try all substrings (O(n³))	Sliding window expands/shrinks intelligently (O(n))
+Always recomputes char counts	Maintains counts dynamically
+Very slow for n=10⁵	Handles n=10⁵ easily
