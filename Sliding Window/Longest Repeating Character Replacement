@@ -1,5 +1,5 @@
 🃏 Revision Card: Longest Repeating Character Replacement (Leetcode 424)
-📌 Problem
+📌 Problem : https://leetcode.com/problems/longest-repeating-character-replacement/
 
 Given a string s and an integer k, you may change at most k characters in the string.
 Return the length of the longest substring containing the same letter after at most k replacements.
