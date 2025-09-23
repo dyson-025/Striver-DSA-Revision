@@ -1,5 +1,5 @@
 🃏 Revision Card: Count Number of Nice Subarrays
-📌 Problem
+📌 Problem: https://leetcode.com/problems/count-number-of-nice-subarrays/
 
 Given an integer array nums and an integer k, return the number of subarrays with exactly k odd numbers.
 
