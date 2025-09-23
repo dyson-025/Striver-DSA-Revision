@@ -1,0 +1,60 @@
+: Maximum Points You Can Obtain from Cards
+🔹 Problem: https://leetcode.com/problems/maximum-points-you-can-obtain-from-cards/
+
+Pick exactly k cards from the beginning or end of the array cardPoints.
+Return the maximum score possible.
+
+✅ Approach: Prefix + Suffix Sum (O(k))
+🔸 Idea
+
+Start by taking all k cards from the left side.
+
+Then gradually replace some left cards with cards from the right side.
+
+Keep track of the maximum score.
+
+🔸 Example
+
+cardPoints = [1,2,3,4,5,6,1], k = 3
+
+Take first 3 → sum = 1+2+3 = 6
+
+Replace last left card with rightmost → 1+2+1 = 4
+
+Replace last 2 left cards with 2 from right → 1+6+1 = 8
+
+Replace all 3 with right side → 5+6+1 = 12 ✅
+
+Answer = 12
+
+🔸 C++ Code
+class Solution {
+public:
+    int maxScore(vector<int>& cardPoints, int k) {
+        int sum = 0, maxsum = 0;
+        
+        // Take all k from left initially
+        for (int i = 0; i < k; i++) {
+            sum += cardPoints[i];
+            maxsum = max(maxsum, sum);
+        }
+
+        int n = cardPoints.size();
+        // Gradually replace left picks with right picks
+        for (int i = n - 1; i >= n - k; i--) {
+            sum = sum + cardPoints[i] - cardPoints[i - (n - k)];
+            maxsum = max(maxsum, sum);
+        }
+
+        return maxsum;
+    }
+};
+
+✅ Complexity
+
+Time: O(k)
+
+Space: O(1)
+
+⚡ Memory Hook:
+👉 “Take k from left, then swap with right one by one → keep max.”
