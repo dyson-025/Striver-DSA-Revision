@@ -1,0 +1,100 @@
+📝 Longest Substring with At Most K Distinct Characters
+📌 Problem: https://www.geeksforgeeks.org/problems/longest-k-unique-characters-substring0853/1
+
+Given a string s and an integer k, find the length of the longest substring that contains at most k distinct characters.
+
+✅ Example
+
+Input: s = "eceba", k = 2
+Output: 3
+Explanation: "ece" is the longest substring with at most 2 distinct characters.
+
+🐢 Brute Force Approach
+
+Idea: Check all substrings and count distinct characters.
+
+Steps
+
+Loop over all substrings s[i..j].
+
+Count distinct characters using a set.
+
+If distinct ≤ k → update max length.
+
+💻 Code (C++)
+class Solution {
+public:
+    int lengthOfLongestSubstringKDistinct(string s, int k) {
+        int n = s.size();
+        int maxlen = 0;
+
+        for (int i = 0; i < n; i++) {
+            unordered_set<char> st;
+            for (int j = i; j < n; j++) {
+                st.insert(s[j]);
+                if (st.size() <= k)
+                    maxlen = max(maxlen, j - i + 1);
+                else break;
+            }
+        }
+        return maxlen;
+    }
+};
+
+
+⏱ Complexity:
+
+Time: O(n²)
+
+Space: O(k)
+
+⚡ Optimized Sliding Window Approach
+
+Idea: Maintain a window with at most k distinct chars using a hashmap.
+
+Steps
+
+Expand window by moving r.
+
+Add chars to hashmap (count freq).
+
+If distinct > k → shrink from l.
+
+Update max length.
+
+💻 Code (C++)
+class Solution {
+public:
+    int lengthOfLongestSubstringKDistinct(string s, int k) {
+        int n = s.size();
+        if (n == 0 || k == 0) return 0;
+
+        unordered_map<char,int> freq;
+        int l = 0, maxlen = 0;
+
+        for (int r = 0; r < n; r++) {
+            freq[s[r]]++;
+
+            while (freq.size() > k) {
+                freq[s[l]]--;
+                if (freq[s[l]] == 0) freq.erase(s[l]);
+                l++;
+            }
+            maxlen = max(maxlen, r - l + 1);
+        }
+        return maxlen;
+    }
+};
+
+
+⏱ Complexity:
+
+Time: O(n)
+
+Space: O(k)
+
+🔑 Key Idea
+
+Brute Force: Try all substrings → easy but slow.
+
+Sliding Window: Expand & shrink window → fast & optimal.
