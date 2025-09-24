@@ -1,0 +1,111 @@
+🌳 Children Sum Property – Revision Notes
+📌 Problem : https://www.geeksforgeeks.org/problems/children-sum-parent/1
+
+In a Binary Tree, each node should satisfy:
+node->val = (left->val + right->val)
+
+Missing child is treated as 0.
+
+Allowed: Increase any node’s value any number of times.
+
+Not allowed: Decreasing node values or changing the structure of the tree.
+
+🔑 Key Idea / Intuition
+
+Pure bottom-up adjustment fails since parent might need decreasing, which is not allowed.
+
+Instead, follow a top-down recursive strategy:
+
+If children_sum < parent->val → push parent value down to children.
+
+If children_sum >= parent->val → lift parent up to match children.
+
+After recursive calls, recompute parent as sum of updated children.
+
+📝 Algorithm
+
+Base Case: If root == NULL, return.
+
+Compute children sum:
+child = (left ? left->val : 0) + (right ? right->val : 0)
+
+Comparison:
+
+If child >= root->val → set root->val = child.
+
+Else (child < root->val) → update child (left or right) to match parent’s value.
+
+Recursive Calls: Process left and right recursively.
+
+Postprocessing: Update root->val = (left->val + right->val) if children exist.
+
+🧩 Example
+
+Input:
+
+        50
+       /  \
+      7    2
+     / \  / \
+    3  5 1  30
+
+
+Output (after enforcing property):
+
+        50
+       /  \
+     55    5
+    / \   / \
+  86   1 31  30
+
+🖥️ C++ Code (Optimal)
+class Solution {
+public:
+    void changeTree(TreeNode* root) {
+        if (!root) return;
+
+        int child = 0;
+        if (root->left) child += root->left->val;
+        if (root->right) child += root->right->val;
+
+        if (child >= root->val) {
+            root->val = child;
+        } else {
+            if (root->left) root->left->val = root->val;
+            else if (root->right) root->right->val = root->val;
+        }
+
+        changeTree(root->left);
+        changeTree(root->right);
+
+        int tot = 0;
+        if (root->left) tot += root->left->val;
+        if (root->right) tot += root->right->val;
+
+        if (root->left || root->right) root->val = tot;
+    }
+};
+
+⏳ Complexity
+
+Time Complexity: O(N) → each node visited once.
+
+Space Complexity:
+
+O(H) recursion stack (H = height).
+
+Worst case skewed → O(N).
+
+Best case balanced → O(log N).
+
+📚 Quick Notes (for exam/interview)
+
+Always push values down when parent > children sum.
+
+Always pull values up when children sum > parent.
+
+Update node after recursive calls.
+
+Cannot decrement → strategy is increment only.
+
+Works for both skewed and balanced trees.
