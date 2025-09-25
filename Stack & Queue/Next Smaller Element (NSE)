@@ -1,0 +1,92 @@
+🔥 Next Smaller Element (NSE) – Revision Notes
+📝 Problem: https://www.geeksforgeeks.org/problems/immediate-smaller-element1142/1
+
+Given an array arr[].
+
+For each element, find the Next Smaller Element (NSE) on its right side.
+
+If no smaller element exists → return -1.
+
+⚡ Intuition
+
+Yeh bhi monotonic stack ka direct application hai (same jaise Next Greater Element).
+
+Bas condition reverse karni hai:
+
+NGE → pop while st.top() <= arr[i].
+
+NSE → pop while st.top() >= arr[i].
+
+🛠️ Approach
+
+Traverse array from right to left.
+
+Maintain a monotonic increasing stack (store only potential smaller elements).
+
+While stack not empty and st.top() >= arr[i] → pop.
+
+If stack empty → NSE = -1.
+Else → st.top() is NSE.
+
+Push arr[i] into stack.
+
+⏱️ Complexity
+
+Time: O(n) (each element pushed/popped at most once).
+
+Space: O(n) (stack + result).
+
+✅ Dry Run Example
+
+arr = [4, 8, 5, 2, 25]
+
+Traverse right → left:
+
+i=4 (25): stack empty → NSE=-1 → push 25
+i=3 (2):  stack=[25], top=25>=2 → pop → empty → NSE=-1 → push 2
+i=2 (5):  stack=[2], top=2<5 → NSE=2 → push 5
+i=1 (8):  stack=[2,5], pop 5>=8? no, pop 2>=8? no → NSE=5 → push 8
+i=0 (4):  stack=[2,5,8], pop 8>=4 → pop 8, pop 5>=4 → pop 5 → NSE=2 → push 4
+
+
+➡️ Result = [2, 5, 2, -1, -1]
+
+🧩 Clean Code
+class Solution {
+public:
+    vector<int> nextSmallerElement(vector<int>& arr) {
+        int n = arr.size();
+        vector<int> result(n, -1);
+        stack<int> st;
+
+        for (int i = n - 1; i >= 0; i--) {
+            while (!st.empty() && st.top() >= arr[i]) {
+                st.pop();
+            }
+
+            if (!st.empty()) {
+                result[i] = st.top();
+            }
+
+            st.push(arr[i]);
+        }
+        return result;
+    }
+};
+
+📌 Quick Rules (Revision)
+Variation	Direction	Condition in while loop	Stack type
+Next Greater	Right → Left	st.top() <= arr[i]	Monotonic Decreasing
+Next Smaller	Right → Left	st.top() >= arr[i]	Monotonic Increasing
+Prev Greater	Left → Right	st.top() <= arr[i]	Monotonic Decreasing
+Prev Smaller	Left → Right	st.top() >= arr[i]	Monotonic Increasing
+
+👉 One golden line:
+
+Greater → use <=
+
+Smaller → use >=
+
+Next → traverse right → left
+
+Previous → traverse left → right
