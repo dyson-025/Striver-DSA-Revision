@@ -1,0 +1,156 @@
+🚀 Trapping Rainwater – All Solutions (C++)
+ link: https://leetcode.com/problems/trapping-rain-water/submissions/1681161133/
+🔹 Solution 1: Brute Force Approach
+Intuition:
+
+Har index pe water trapped = minimum of (max on left, max on right) – height[i]
+
+Left aur Right max ke liye har index pe loop chalana padega → O(N²)
+
+Code:
+#include <bits/stdc++.h>
+using namespace std;
+
+int trapBrute(vector<int>& height) {
+    int n = height.size();
+    int water = 0;
+
+    // Iterate through each index
+    for (int i = 0; i < n; i++) {
+        int leftMax = 0, rightMax = 0;
+
+        // find left max
+        for (int j = i; j >= 0; j--) {
+            leftMax = max(leftMax, height[j]);
+        }
+
+        // find right max
+        for (int j = i; j < n; j++) {
+            rightMax = max(rightMax, height[j]);
+        }
+
+        // trapped water = min(leftMax, rightMax) - current height
+        water += min(leftMax, rightMax) - height[i];
+    }
+    return water;
+}
+
+int main() {
+    vector<int> arr = {0,1,0,2,1,0,1,3,2,1,2,1};
+    cout << "Brute Force: " << trapBrute(arr) << endl; // Output: 6
+}
+
+
+⏱ Time Complexity: O(N²)
+💾 Space Complexity: O(1)
+
+🔹 Solution 2: Prefix–Suffix (Better Approach)
+Intuition:
+
+Left max aur Right max baar-baar calculate karne ki jagah prefix aur suffix arrays precompute kar lo.
+
+prefix[i] = max height from [0…i]
+
+suffix[i] = max height from [i…n-1]
+
+Code:
+#include <bits/stdc++.h>
+using namespace std;
+
+int trapPrefixSuffix(vector<int>& height) {
+    int n = height.size();
+    if (n == 0) return 0;
+
+    vector<int> prefix(n), suffix(n);
+
+    // Build prefix max
+    prefix[0] = height[0];
+    for (int i = 1; i < n; i++) {
+        prefix[i] = max(prefix[i - 1], height[i]);
+    }
+
+    // Build suffix max
+    suffix[n - 1] = height[n - 1];
+    for (int i = n - 2; i >= 0; i--) {
+        suffix[i] = max(suffix[i + 1], height[i]);
+    }
+
+    // Calculate trapped water
+    int water = 0;
+    for (int i = 0; i < n; i++) {
+        water += min(prefix[i], suffix[i]) - height[i];
+    }
+
+    return water;
+}
+
+int main() {
+    vector<int> arr = {4,2,0,3,2,5};
+    cout << "Prefix-Suffix: " << trapPrefixSuffix(arr) << endl; // Output: 9
+}
+
+
+⏱ Time Complexity: O(N)
+💾 Space Complexity: O(N) (for prefix & suffix arrays)
+
+🔹 Solution 3: Two Pointer Approach (Optimal)
+Intuition:
+
+Left aur Right dono side se ek-saath traverse karte hain.
+
+Maintain leftMax aur rightMax.
+
+Jo side chhoti hai usko move karte hain → kyunki water hamesha shorter boundary pe depend karega.
+
+Dry Run Example [0,1,0,2,1,0,1,3,2,1,2,1]:
+
+Start: left=0, right=11, leftMax=0, rightMax=0
+
+Compare height[left] aur height[right]
+
+Move smaller side, update max, aur water add karo.
+
+At the end total = 6
+
+Code:
+#include <bits/stdc++.h>
+using namespace std;
+
+int trapTwoPointer(vector<int>& height) {
+    int n = height.size();
+    int left = 0, right = n - 1;
+    int leftMax = 0, rightMax = 0, water = 0;
+
+    while (left < right) {
+        // Update leftMax and rightMax
+        leftMax = max(leftMax, height[left]);
+        rightMax = max(rightMax, height[right]);
+
+        // Decide which side to process
+        if (leftMax <= rightMax) {
+            water += leftMax - height[left];
+            left++;
+        } else {
+            water += rightMax - height[right];
+            right--;
+        }
+    }
+    return water;
+}
+
+int main() {
+    vector<int> arr = {0,1,0,2,1,0,1,3,2,1,2,1};
+    cout << "Two Pointer: " << trapTwoPointer(arr) << endl; // Output: 6
+}
+
+
+⏱ Time Complexity: O(N)
+💾 Space Complexity: O(1)
+
+📌 Final Notes for Interview
+
+Brute Force – start with this (shows basic idea).
+
+Prefix-Suffix – show improvement with extra space.
+
+Two Pointer – explain intuition clearly → shorter side decides trapped water.
