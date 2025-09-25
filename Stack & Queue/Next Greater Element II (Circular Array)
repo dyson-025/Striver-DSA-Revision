@@ -1,0 +1,91 @@
+🔥 Next Greater Element II (Circular Array) – Revision Notes
+📝 Problem: https://leetcode.com/problems/next-greater-element-ii/submissions/1681458351/
+
+Given a circular array nums.
+
+For each element, find the Next Greater Element (NGE).
+
+If no greater element exists → return -1.
+
+⚡ Intuition
+
+Normal NGE (LeetCode 496) → linear array, simple monotonic stack.
+
+But here array is circular → last element may find NGE in the front part.
+
+Trick → iterate the array twice (2n) to simulate circular behavior.
+
+🛠️ Approach
+
+Traverse array from right to left (2n - 1 → 0).
+
+Maintain monotonic decreasing stack:
+
+Pop elements ≤ current element (useless as NGE).
+
+If stack not empty → top is NGE.
+
+If empty → NGE = -1.
+
+Only update result[i] when i < n (first pass only).
+
+Push current element into stack.
+
+⏱️ Complexity
+
+Time: O(2n) = O(n) (each element pushed/popped at most once).
+
+Space: O(n) (stack + result).
+
+✅ Dry Run Example
+
+nums = [1, 2, 1]
+
+Traverse from i = 5 → 0 (2n - 1).
+
+Build stack & results:
+
+i=5 (idx=2): stack empty → result[2] = -1 → push 1
+i=4 (idx=1): stack=[1], top=1 ≤ 2 → pop → empty → result[1] = -1 → push 2
+i=3 (idx=0): stack=[2], top=2 > 1 → result[0]=2 → push 1
+
+
+➡️ Final result = [2, -1, 2]
+
+🧩 Clean Code
+class Solution {
+public:
+    vector<int> nextGreaterElements(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> result(n, -1);
+        stack<int> st;
+
+        for (int i = 2*n - 1; i >= 0; i--) {
+            int idx = i % n;
+
+            while (!st.empty() && st.top() <= nums[idx]) {
+                st.pop();
+            }
+
+            if (i < n && !st.empty()) {
+                result[idx] = st.top();
+            }
+
+            st.push(nums[idx]);
+        }
+        return result;
+    }
+};
+
+📌 Key Differences: NGE I vs NGE II
+Feature	NGE I	NGE II
+Array	Linear	Circular
+Pass	1 pass	2 passes
+Trick	Simple stack	Use i % n index
+Result	Next greater on right	Next greater on right (even wrapping around)
+
+👉 Monotonic stack rule yaad rakh:
+
+Next Greater → traverse right → left, pop smaller.
+
+Next Smaller → traverse right → left, pop bigger.
