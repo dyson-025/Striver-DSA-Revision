@@ -1,0 +1,533 @@
+📒 Revision Notes – Stack using Array
+✅ What is a Stack?
+
+A linear data structure that follows LIFO (Last In First Out) principle.
+
+Last element inserted is the first one to be removed.
+
+Examples in real life:
+
+Stack of plates.
+
+Undo operations in editors.
+
+✅ Key Operations
+
+push(x): Insert an element on the top of the stack.
+
+pop(): Remove and return the top element.
+
+top(): Return the current top element without removing it.
+
+size(): Return number of elements in stack.
+
+✅ Implementation using Array
+
+Maintain:
+
+array (to store elements).
+
+top (index of last inserted element).
+
+Steps:
+
+Initialize top = -1.
+
+push(x): Increase top by 1 → insert element at arr[top].
+
+pop(): Return arr[top] → decrease top by 1.
+
+top(): Return arr[top].
+
+size(): Return top + 1.
+
+✅ C++ Code (Simplified)
+#include <bits/stdc++.h>
+using namespace std;
+
+class Stack {
+    int size;
+    int *arr;
+    int top;
+
+public:
+    Stack() {
+        size = 1000;
+        arr = new int[size];
+        top = -1;
+    }
+
+    void push(int x) {
+        top++;
+        arr[top] = x;
+    }
+
+    int pop() {
+        int x = arr[top];
+        top--;
+        return x;
+    }
+
+    int Top() {
+        return arr[top];
+    }
+
+    int Size() {
+        return top + 1;
+    }
+};
+
+int main() {
+    Stack s;
+    s.push(6);
+    s.push(3);
+    s.push(7);
+
+    cout << "Top: " << s.Top() << endl;
+    cout << "Size: " << s.Size() << endl;
+    cout << "Popped: " << s.pop() << endl;
+    cout << "Top after pop: " << s.Top() << endl;
+    cout << "Size after pop: " << s.Size() << endl;
+
+    return 0;
+}
+
+✅ Example Walkthrough
+
+push(6), push(3), push(7)
+→ Stack = [6, 3, 7], Top = 7
+
+pop() → returns 7, Stack = [6, 3], Top = 3
+
+✅ Complexity
+
+Time Complexity:
+
+push() → O(1)
+
+pop() → O(1)
+
+top() → O(1)
+
+size() → O(1)
+
+Space Complexity: O(N) (for array storage).
+
+👉 Remember:
+
+top = -1 means stack is empty.
+
+Be careful about stack overflow (if array is full) and underflow (if stack is empty).
+
+my doubts:
+ int *arr; what is this
+ChatGPT said:
+
+Good question 👍
+Let’s break down
+
+int *arr;
+
+✅ What does it mean?
+
+int *arr;
+→ This means arr is a pointer to an integer.
+
+In simple words: it will store the address of a memory block that contains integers.
+
+Later, we will allocate memory for it.
+
+✅ Why use pointer here?
+
+When we write:
+
+arr = new int[size];
+
+
+This line dynamically allocates an array of integers of length size in heap memory.
+
+The base address of that array is stored in arr.
+
+So now, arr behaves like a normal array:
+
+arr[0] = 10;
+arr[1] = 20;
+
+
+Behind the scenes, arr is pointing to the starting location of that allocated block.
+
+✅ Example
+#include <iostream>
+using namespace std;
+
+int main() {
+    int *arr;       // declare a pointer to int
+    int size = 5;   // size of array
+    arr = new int[size];  // dynamically allocate memory
+
+    // store values
+    for(int i = 0; i < size; i++) {
+        arr[i] = i + 1;  // works like normal array
+    }
+
+    // print values
+    for(int i = 0; i < size; i++) {
+        cout << arr[i] << " ";
+    }
+    return 0;
+}
+
+
+Output:
+
+1 2 3 4 5
+
+✅ In summary
+
+int *arr; → declares a pointer to integer.
+
+new int[size]; → allocates an integer array dynamically.
+
+arr stores the address of the first element of that array.
+
+ChatGPT said:
+
+Perfect 👌 Let’s compare int arr[1000]; vs int *arr; arr = new int[size];
+
+✅ 1. Fixed Array (Stack Memory)
+int arr[1000];
+
+
+Array of fixed size (1000) is created on stack memory.
+
+Size must be known at compile time (before the program runs).
+
+Cannot change the size later.
+
+👉 Pros:
+
+Easy, fast allocation.
+
+No need for new or delete.
+
+👉 Cons:
+
+Wastes memory if 1000 is too large.
+
+Stack memory is limited → very big arrays may cause stack overflow.
+
+✅ 2. Dynamic Array (Heap Memory)
+int *arr;
+arr = new int[size];
+
+
+Array is created on the heap memory.
+
+Size can be decided at runtime (user input, variable, etc.).
+
+Can allocate larger memory (heap is usually bigger than stack).
+
+👉 Pros:
+
+Flexible size (runtime).
+
+Can handle larger arrays.
+
+👉 Cons:
+
+Slightly slower (because heap allocation).
+
+Must manage memory manually (delete[] arr; after use).
+
+If you forget delete[], it causes memory leaks.
+
+✅ Why in Stack Implementation we use int *arr?
+
+Because we want to allow the stack to be created with any size.
+
+Example:
+
+Stack s1(1000);  // stack of size 1000
+Stack s2(10000); // stack of size 10000
+
+
+If we hardcode int arr[1000];, every stack object is stuck with 1000 elements, no flexibility.
+
+✅ Quick Analogy
+
+int arr[1000]; → Like buying a cupboard with exactly 1000 shelves.
+
+int *arr = new int[size]; → Like ordering a cupboard at runtime and telling the carpenter how many shelves you want.
+
+👉 Do you want me to also show how to free memory (delete) in this stack implementation (since right now code leaks memory)?
+
+You said:
+yes
+ChatGPT said:
+
+Nice catch 🔥 — you’re thinking like a good C++ dev.
+Right now, the stack code we wrote allocates memory with new int[size]; but never frees it, which causes a memory leak.
+
+✅ How to free memory
+
+In C++, whenever we use new, we should also use delete (or delete[] for arrays).
+So in our Stack class, we add a destructor:
+
+~Stack() {
+    delete[] arr;  // frees the array memory from heap
+}
+
+✅ Fixed Stack Class with Destructor
+#include <bits/stdc++.h>
+using namespace std;
+
+class Stack {
+    int size;
+    int *arr;
+    int top;
+
+public:
+    // constructor
+    Stack(int s = 1000) {   // default size = 1000
+        size = s;
+        arr = new int[size];
+        top = -1;
+    }
+
+    // destructor
+    ~Stack() {
+        delete[] arr;  // prevent memory leak
+    }
+
+    void push(int x) {
+        if (top == size - 1) {
+            cout << "Stack Overflow!" << endl;
+            return;
+        }
+        top++;
+        arr[top] = x;
+    }
+
+    int pop() {
+        if (top == -1) {
+            cout << "Stack Underflow!" << endl;
+            return -1;
+        }
+        int x = arr[top];
+        top--;
+        return x;
+    }
+
+    int Top() {
+        if (top == -1) {
+            cout << "Stack is empty!" << endl;
+            return -1;
+        }
+        return arr[top];
+    }
+
+    int Size() {
+        return top + 1;
+    }
+};
+
+int main() {
+    Stack s(5);   // stack of size 5
+    s.push(10);
+    s.push(20);
+    s.push(30);
+
+    cout << "Top = " << s.Top() << endl;
+    cout << "Size = " << s.Size() << endl;
+
+    s.pop();
+    cout << "Top after pop = " << s.Top() << endl;
+
+    // destructor is called automatically here when object goes out of scope
+    return 0;
+}
+
+✅ Why this is important
+
+Without delete[] arr;, memory stays reserved even after the stack object is destroyed.
+
+With destructor, memory is freed automatically when the object goes out of scope.
+
+⚡ Question for you:
+Do you want me to also show you how to implement this stack class using vector<int> instead of raw new[]? (then you don’t need to worry about delete).
+
+You said:
+yes and combine all my doubt in one
+ChatGPT said:
+
+Perfect 👍 Let’s make one final, clean revision note that covers all your doubts in one place:
+
+📒 Revision Notes – Stack using Array (C++)
+✅ 1. What is a Stack?
+
+A linear data structure that follows LIFO (Last In First Out) principle.
+
+Operations:
+
+push(x) → Insert element at the top.
+
+pop() → Remove and return top element.
+
+top() → Return current top element.
+
+size() → Return number of elements.
+
+✅ 2. Implementation Approaches
+🔹 (A) Fixed Array
+int arr[1000];
+
+
+Allocated on stack memory.
+
+Fixed size → cannot be changed at runtime.
+
+Simple, but wastes memory if unused.
+
+🔹 (B) Dynamic Array (with Pointer + new[])
+int *arr;            // pointer to int
+arr = new int[size]; // allocates array at runtime (heap)
+
+
+Size can be chosen at runtime.
+
+Stored in heap memory (larger, flexible).
+
+Must free memory using delete[] arr; → otherwise memory leak.
+
+👉 Why int *arr?
+Because we don’t know size at compile-time.
+int *arr is a pointer that stores address of dynamically allocated memory.
+arr[i] still works like normal array indexing.
+
+🔹 (C) Using vector<int> (Recommended in Modern C++)
+vector<int> arr;
+
+
+Resizes automatically.
+
+No manual memory management.
+
+Cleaner and safer.
+
+✅ 3. Stack Class – Dynamic Array Version
+#include <bits/stdc++.h>
+using namespace std;
+
+class Stack {
+    int size;
+    int *arr;   // pointer to dynamic array
+    int top;
+
+public:
+    // constructor
+    Stack(int s = 1000) {
+        size = s;
+        arr = new int[size];
+        top = -1;
+    }
+
+    // destructor (to free memory)
+    ~Stack() {
+        delete[] arr;
+    }
+
+    void push(int x) {
+        if (top == size - 1) {
+            cout << "Stack Overflow!" << endl;
+            return;
+        }
+        arr[++top] = x;
+    }
+
+    int pop() {
+        if (top == -1) {
+            cout << "Stack Underflow!" << endl;
+            return -1;
+        }
+        return arr[top--];
+    }
+
+    int Top() {
+        if (top == -1) {
+            cout << "Stack is empty!" << endl;
+            return -1;
+        }
+        return arr[top];
+    }
+
+    int Size() {
+        return top + 1;
+    }
+};
+
+✅ 4. Stack Class – Using vector<int>
+class Stack {
+    vector<int> arr;
+
+public:
+    void push(int x) {
+        arr.push_back(x);
+    }
+
+    int pop() {
+        if (arr.empty()) {
+            cout << "Stack Underflow!" << endl;
+            return -1;
+        }
+        int x = arr.back();
+        arr.pop_back();
+        return x;
+    }
+
+    int Top() {
+        if (arr.empty()) {
+            cout << "Stack is empty!" << endl;
+            return -1;
+        }
+        return arr.back();
+    }
+
+    int Size() {
+        return arr.size();
+    }
+};
+
+✅ 5. Example Run
+Stack s;
+s.push(10);
+s.push(20);
+s.push(30);
+
+cout << s.Top() << endl;   // 30
+cout << s.Size() << endl;  // 3
+
+s.pop();                   // removes 30
+cout << s.Top() << endl;   // 20
+cout << s.Size() << endl;  // 2
+
+✅ 6. Complexity
+
+push() → O(1)
+
+pop() → O(1)
+
+top() → O(1)
+
+size() → O(1)
+
+Space: O(N)
+
+✅ Key Takeaways
+
+int arr[1000] → fixed size, stack memory.
+
+int *arr = new int[size]; → runtime size, heap memory (must delete[]).
+
+vector<int> → modern, safe, resizable (best choice in C++).
+
+Always use destructor if using new[].
