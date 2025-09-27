@@ -1,0 +1,221 @@
+✅ Queue Using Array (Circular Queue)
+Intuition
+
+A queue follows FIFO (First In First Out).
+
+Using a circular array helps avoid shifting elements after every pop.
+
+We maintain:
+
+start → index of front element
+
+end → index of last element
+
+currSize → current number of elements
+
+maxSize → maximum size of queue
+
+Operations
+
+push(x) → Insert at end
+
+If full → print error.
+
+Else → move end to (end + 1) % maxSize.
+
+pop() → Remove from start
+
+If empty → print error.
+
+Else → return element at start, then move start.
+
+top() → Return front element without removing.
+
+size() → Return currSize.
+
+If after pop queue becomes empty → reset start = end = -1.
+
+C++ Implementation
+#include <bits/stdc++.h>
+using namespace std;
+
+class Queue {
+    int *arr;
+    int start, end, currSize, maxSize;
+
+public:
+    Queue(int maxSize) {
+        this->maxSize = maxSize;
+        arr = new int[maxSize];
+        start = -1;
+        end = -1;
+        currSize = 0;
+    }
+
+    void push(int newElement) {
+        if (currSize == maxSize) {
+            cout << "Queue is full\n";
+            return;
+        }
+        if (end == -1) {
+            start = 0;
+            end = 0;
+        } else {
+            end = (end + 1) % maxSize;
+        }
+        arr[end] = newElement;
+        cout << "The element pushed is " << newElement << endl;
+        currSize++;
+    }
+
+    int pop() {
+        if (start == -1) {
+            cout << "Queue is Empty\n";
+            return -1;
+        }
+        int popped = arr[start];
+        if (currSize == 1) {
+            start = -1;
+            end = -1;
+        } else {
+            start = (start + 1) % maxSize;
+        }
+        currSize--;
+        return popped;
+    }
+
+    int top() {
+        if (start == -1) {
+            cout << "Queue is Empty\n";
+            return -1;
+        }
+        return arr[start];
+    }
+
+    int size() {
+        return currSize;
+    }
+};
+
+// Driver code
+int main() {
+    Queue q(6);
+    q.push(4);
+    q.push(14);
+    q.push(24);
+    q.push(34);
+
+    cout << "The peek of the queue before deleting any element " << q.top() << endl;
+    cout << "The size of the queue before deletion " << q.size() << endl;
+    cout << "The first element to be deleted " << q.pop() << endl;
+    cout << "The peek of the queue after deleting an element " << q.top() << endl;
+    cout << "The size of the queue after deleting an element " << q.size() << endl;
+
+    return 0;
+}
+
+Sample Output
+The element pushed is 4
+The element pushed is 14
+The element pushed is 24
+The element pushed is 34
+The peek of the queue before deleting any element 4
+The size of the queue before deletion 4
+The first element to be deleted 4
+The peek of the queue after deleting an element 14
+The size of the queue after deleting an element 3
+
+Complexity
+
+Push → O(1)
+
+Pop → O(1)
+
+Top → O(1)
+
+Size → O(1)
+
+Space → O(n)
+
+Do you also want me to make a visual dry run (step by step with array indices update for push & pop) so you can fully remember how start and end move?
+
+You said:
+yes
+ChatGPT said:
+
+Perfect 👍 Let’s do a step-by-step dry run for the same example:
+
+We’ll take Queue q(6) → capacity = 6
+Initially:
+
+arr = [ _ , _ , _ , _ , _ , _ ]
+start = -1, end = -1, currSize = 0
+
+Step 1 → q.push(4)
+
+Queue is empty, so start = 0, end = 0
+
+arr[0] = 4
+
+arr = [ 4 , _ , _ , _ , _ , _ ]
+start = 0, end = 0, currSize = 1
+
+Step 2 → q.push(14)
+
+end = (0 + 1) % 6 = 1
+
+arr[1] = 14
+
+arr = [ 4 , 14 , _ , _ , _ , _ ]
+start = 0, end = 1, currSize = 2
+
+Step 3 → q.push(24)
+
+end = (1 + 1) % 6 = 2
+
+arr[2] = 24
+
+arr = [ 4 , 14 , 24 , _ , _ , _ ]
+start = 0, end = 2, currSize = 3
+
+Step 4 → q.push(34)
+
+end = (2 + 1) % 6 = 3
+
+arr[3] = 34
+
+arr = [ 4 , 14 , 24 , 34 , _ , _ ]
+start = 0, end = 3, currSize = 4
+
+Step 5 → q.top()
+
+Returns arr[start] = arr[0] = 4
+
+Step 6 → q.size()
+
+currSize = 4
+
+Step 7 → q.pop()
+
+Element popped = arr[start] = arr[0] = 4
+
+start = (0 + 1) % 6 = 1
+
+arr = [ 4 , 14 , 24 , 34 , _ , _ ]
+start = 1, end = 3, currSize = 3
+
+
+Now 14 is at the front.
+
+Step 8 → q.top()
+
+Returns arr[start] = arr[1] = 14
+
+Step 9 → q.size()
+
+currSize = 3
+
+✅ Final state after all operations:
+
+arr = [ 4 , 14 , 24 , 34 , _ , _ ]
+start = 1, end = 3, currSize 
