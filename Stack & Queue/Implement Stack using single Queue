@@ -1,0 +1,123 @@
+🔹 Problem Statement
+
+We need to implement a Stack (LIFO) using only one Queue (FIFO).
+
+Stack: Last In First Out → push(), pop(), top(), size().
+
+Queue: First In First Out → push(), pop() from front.
+
+🔹 Intuition
+
+Normally, a queue removes from the front and inserts at the back.
+
+But in a stack, we need to always get the latest inserted element first.
+
+So whenever we push(x), we rotate the queue such that the new element comes to the front of the queue.
+
+That way:
+
+pop() just removes from the front.
+
+top() just checks the front.
+
+🔹 Approach
+
+Use one queue.
+
+For Push(x):
+
+Insert the new element into the queue.
+
+Then rotate all old elements behind it (size-1 times).
+
+For Pop():
+
+Just remove from the front of the queue.
+
+For Top():
+
+Return the front of the queue.
+
+For Size():
+
+Return the queue size.
+
+🔹 C++ Implementation
+#include <bits/stdc++.h>
+using namespace std;
+
+class Stack {
+    queue<int> q;
+public:
+    // Push element into stack
+    void Push(int x) {
+        int s = q.size();
+        q.push(x);
+
+        // Move all previous elements behind the new element
+        for (int i = 0; i < s; i++) {
+            q.push(q.front());
+            q.pop();
+        }
+    }
+
+    // Pop element from stack
+    int Pop() {
+        if (q.empty()) {
+            cout << "Stack is empty!\n";
+            return -1;
+        }
+        int n = q.front();
+        q.pop();
+        return n;
+    }
+
+    // Get top element
+    int Top() {
+        if (q.empty()) {
+            cout << "Stack is empty!\n";
+            return -1;
+        }
+        return q.front();
+    }
+
+    // Get stack size
+    int Size() {
+        return q.size();
+    }
+};
+
+int main() {
+    Stack s;
+    s.Push(3);
+    s.Push(2);
+    s.Push(4);
+    s.Push(1);
+
+    cout << "Top of the stack: " << s.Top() << endl;
+    cout << "Size before removing element: " << s.Size() << endl;
+    cout << "The deleted element is: " << s.Pop() << endl;
+    cout << "Top after removing element: " << s.Top() << endl;
+    cout << "Size after removing element: " << s.Size() << endl;
+
+    return 0;
+}
+
+🔹 Output
+Top of the stack: 1
+Size before removing element: 4
+The deleted element is: 1
+Top after removing element: 4
+Size after removing element: 3
+
+🔹 Complexity Analysis
+
+Push(x): O(N) → because we rotate n-1 elements.
+
+Pop(): O(1)
+
+Top(): O(1)
+
+Size(): O(1)
+
+Space Complexity: O(N)
