@@ -1,0 +1,241 @@
+Sliding Window Maximum – Revision Notes
+Problem Statement: https://leetcode.com/problems/sliding-window-maximum/
+solution : https://youtu.be/XwG5cozqfaM?si=v_ubfMI9mL32fa4Z
+
+Given:
+
+An integer array nums of size n.
+
+A window size k.
+
+Task:
+
+There is a sliding window of size k moving from the left of the array to the right, one element at a time.
+
+For each window, find the maximum element.
+
+Return an array of these maximums.
+
+Constraints:
+
+1 <= k <= nums.size()
+
+-10^5 <= nums[i] <= 10^5
+
+Example 1:
+
+Input: nums = [4,0,-1,3,5,3,6,8], k = 3
+Output: [4,3,5,5,6,8]
+Explanation:
+Window positions:         Max:
+[4 0 -1] 3 5 3 6 8        4
+4 [0 -1 3] 5 3 6 8        3
+4 0 [-1 3 5] 3 6 8        5
+4 0 -1 [3 5 3] 6 8        5
+4 0 -1 3 [5 3 6] 8        6
+4 0 -1 3 5 [3 6 8]        8
+
+
+Example 2:
+
+Input: nums = [20,25], k = 2
+Output: [25]
+Explanation: Only one window possible; maximum is 25.
+
+Solution 1: Brute Force
+Idea
+
+For every window of size k, check all elements to find the maximum.
+
+Simple, but inefficient.
+
+Approach
+
+Use two pointers left and right to mark the window.
+
+For each window, compute the maximum element.
+
+Slide the window by moving both pointers by 1.
+
+Repeat until the end of the array.
+
+Code (C++):
+void GetMax(vector<int>& nums, int l, int r, vector<int>& arr){
+    int maxi = INT_MIN;
+    for(int i = l; i <= r; i++)
+        maxi = max(maxi, nums[i]);
+    arr.push_back(maxi);
+}
+
+vector<int> maxSlidingWindow(vector<int>& nums, int k){
+    int left = 0, right = 0;
+    vector<int> arr;
+    while(right < k - 1) right++;
+    
+    while(right < nums.size()){
+        GetMax(nums, left, right, arr);
+        left++; right++;
+    }
+    return arr;
+}
+
+
+Time Complexity: O(N*K)
+Space Complexity: O(K) (result array)
+
+Observation: Brute force works but is slow for large arrays.
+
+Solution 2: Optimized Using Deque
+Idea
+
+Maintain a deque storing indices of potential maximums.
+
+Only elements that could be the maximum in the current or future window are kept.
+
+Front of deque always has the maximum for the current window.
+
+Deque Update Rules
+
+Remove out-of-window indices from the front (dq.front() <= i-k).
+
+Remove smaller elements from rear (nums[dq.back()] < nums[i]) — they cannot be maximum in future.
+
+Push current index to rear.
+
+If window size ≥ k, front of deque is the maximum.
+
+Standard Implementation
+vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+    deque<int> dq;
+    vector<int> ans;
+
+    for(int i = 0; i < nums.size(); i++) {
+        if(!dq.empty() && dq.front() == i - k) dq.pop_front();
+        while(!dq.empty() && nums[dq.back()] < nums[i]) dq.pop_back();
+        dq.push_back(i);
+        if(i >= k - 1) ans.push_back(nums[dq.front()]);
+    }
+    return ans;
+}
+
+Alternative Implementation (Your Version)
+class Solution {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        deque<int> dq;
+        // Initialize deque for first window
+        for(int i = 0; i < k; i++){
+            while(!dq.empty() && nums[dq.back()] <= nums[i])
+                dq.pop_back();
+            dq.push_back(i);
+        }
+        vector<int> result;
+        // Process remaining elements
+        for(int i = k; i < nums.size(); i++){
+            result.push_back(nums[dq.front()]);  // max of previous window
+            while(!dq.empty() && dq.front() <= i - k)
+                dq.pop_front();  // remove out-of-window
+            while(!dq.empty() && nums[dq.back()] < nums[i])
+                dq.pop_back();   // remove smaller elements
+            dq.push_back(i);
+        }
+        result.push_back(nums[dq.front()]);  // max of last window
+        return result;
+    }
+};
+
+Time & Space Complexity
+
+Time Complexity: O(N) — each element enters and exits deque at most once.
+
+Space Complexity: O(K) — deque stores indices of at most k elements.
+
+Step-by-Step Deque Example (nums = [4,0,-1,3,5,3,6,8], k = 3)
+i	nums[i]	Deque Indices	Window Elements	Current Max
+0	4	[0]	[4]	-
+1	0	[0,1]	[4,0]	-
+2	-1	[0,1,2]	[4,0,-1]	4
+3	3	[3,2]	[0,-1,3]	3
+4	5	[4]	[-1,3,5]	5
+5	3	[4,5]	[3,5,3]	5
+6	6	[6]	[5,3,6]	6
+7	8	[7]	[3,6,8]	8
+
+Front of deque always gives the maximum of the current window.
+
+✅ Key Points to Remember
+
+Brute force is simple but slow.
+
+Optimized solution uses deque to track potential maximums.
+
+Always store indices in deque, not values.
+
+Check window bounds to remove out-of-window elements.
+
+Remove all smaller elements from rear before adding new element. 
+
+Perfect! Let’s make a visual step-by-step diagram showing how the deque changes as the window slides. We’ll use the example:
+
+nums = [4,0,-1,3,5,3,6,8], k = 3
+
+Step-by-Step Deque Visualization
+Step	Window Elements	Deque (Indices)	Current Max
+i=0	[4]	[0]	-
+i=1	[4,0]	[0,1]	-
+i=2	[4,0,-1]	[0,1,2]	4
+i=3	[0,-1,3]	[3]	4 → 3
+i=4	[-1,3,5]	[4]	5
+i=5	[3,5,3]	[4,5]	5
+i=6	[5,3,6]	[6]	6
+i=7	[3,6,8]	[7]	8
+How Deque is Updated Each Step
+
+Remove Out-of-Window Elements
+
+If dq.front() <= i-k, pop from front.
+
+Example: At i=3, front=0 is out of window → pop front.
+
+Remove Smaller Elements from Rear
+
+While nums[dq.back()] < nums[i], pop from back.
+
+Example: At i=4, nums[3]=3 < nums[4]=5 → pop back → deque=[4].
+
+Add Current Index
+
+Always push i to back of deque.
+
+Deque maintains indices of elements in decreasing order of value.
+
+Maximum
+
+nums[dq.front()] is max for current window (size ≥ k).
+
+Sliding Window Illustration
+nums:  4   0  -1   3   5   3   6   8
+index: 0   1   2   3   4   5   6   7
+window: [4 0 -1] -> max = 4
+window:  4 [0 -1 3] -> max = 3
+window:  4 0 [-1 3 5] -> max = 5
+window:  4 0 -1 [3 5 3] -> max = 5
+window:  4 0 -1 3 [5 3 6] -> max = 6
+window:  4 0 -1 3 5 [3 6 8] -> max = 8
+
+
+Deque content at each window (stores indices):
+
+Window 1: [0,1,2]
+Window 2: [3]
+Window 3: [4]
+Window 4: [4,5]
+Window 5: [6]
+Window 6: [7]
+
+
+✅ Key Takeaway:
+
+The deque always keeps potential maximums in decreasing order.
+
+Front is the current max, rear elements are only kept if they could be max in future windows.
