@@ -1,0 +1,59 @@
+Q: How do you generate all unique subsets of an array that may contain duplicates (Subsets II)?
+link: https://leetcode.com/problems/subsets-ii/description/
+✅ Problem Summary
+Given nums[] (may contain duplicates), return all unique subsets (power set).
+No duplicate subsets allowed in output.
+📌 Example
+Input:
+nums = [1, 2, 2]
+Sorted:
+[1, 2, 2]
+Output:
+csharp
+CopyEdit
+[
+  [], 
+  [1], 
+  [1, 2], 
+  [1, 2, 2], 
+  [2], 
+  [2, 2]
+]
+✅ Note: [2, 1] and [1, 2] are considered the same subset, so we only keep one.
+
+🔍 Approach: Backtracking + Sorting + Skip Duplicates
+Sort the input array to bring duplicates together.
+Use backtracking to explore all subsets.
+At each recursive level, skip duplicate elements using:
+cpp
+CopyEdit
+if (i > start && nums[i] == nums[i - 1]) continue;
+✅ Code (C++):
+cpp
+CopyEdit
+void backtrack(int start, vector<int>& nums, vector<int>& path, vector<vector<int>>& res) {
+    res.push_back(path);
+    for (int i = start; i < nums.size(); ++i) {
+        if (i > start && nums[i] == nums[i - 1]) continue; // skip duplicate
+        path.push_back(nums[i]);
+        backtrack(i + 1, nums, path, res);
+        path.pop_back();
+    }
+}
+
+vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+    sort(nums.begin(), nums.end()); // sort to handle duplicates
+    vector<vector<int>> res;
+    vector<int> path;
+    backtrack(0, nums, path, res);
+    return res;
+}
+🧠 Key Ideas:
+Sorting is essential to easily skip duplicates.
+Backtracking builds combinations.
+Skipping duplicates ensures no repeated subsets.
+📌 Time & Space:
+Time: O(2ⁿ) — still exponential
+Space: O(n) recursion + O(2ⁿ) output
+📎 Tags:
+Backtracking · Recursion · Subsets · Duplicates
