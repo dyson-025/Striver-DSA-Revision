@@ -1,0 +1,54 @@
+🔢 LeetCode 78 – Subsets
+link:  https://leetcode.com/problems/subsets/submissions/1673082806/
+
+❓ How do you generate all subsets of an array using recursion?
+
+Explain:
+- Recursion structure
+- Base case
+- Choice diagram (Include/Exclude logic)
+
+✅ Approach: Pure Recursion (DFS Style)
+
+🔹 Problem: Given a list of integers `nums`, return all possible subsets (the power set).
+
+🧠 Idea:
+At every index, we have 2 choices:
+1️⃣ Include the current element in the subset
+2️⃣ Exclude it
+
+📍 Base Case:
+→ If index == nums.size() → push the current subset into the result list
+
+🪜 Recursive Steps:
+- Include `nums[idx]` → push to current subset, go to next index
+- Exclude `nums[idx]` → backtrack, remove last added item, and go to next index
+
+---
+
+🧾 Code:
+```cpp
+void solve(int idx, vector<int>& nums, vector<int>& temp, vector<vector<int>>& res) {
+    if (idx == nums.size()) {
+        res.push_back(temp);
+        return;
+    }
+
+    // Include current element
+    temp.push_back(nums[idx]);
+    solve(idx + 1, nums, temp, res);
+
+    // Exclude (backtrack)
+    temp.pop_back();
+    solve(idx + 1, nums, temp, res);
+}
+
+vector<vector<int>> subsets(vector<int>& nums) {
+    vector<vector<int>> res;
+    vector<int> temp;
+    solve(0, nums, temp, res);
+    return res;
+}
+📌 Time Complexity: O(2^n)
+📌 Space Complexity: O(n) (recursive stack + subset length)
+🧠 Total Subsets = 2^n
