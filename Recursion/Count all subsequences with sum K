@@ -1,0 +1,54 @@
+🧠 Problem:
+Given an array of distinct integers candidates and a target integer target, return all unique combinations of candidates where the chosen numbers sum to target. You may use the same number unlimited times.
+✍️ Constraints:
+Only positive integers.
+Same number can be reused multiple times.
+Combinations must be in non-descending order (if sorted).
+No duplicate combinations.
+Input: candidates = [2,3,5], target = 8
+Output: [[2,2,2,2],[2,3,3],[3,5]]
+
+🔁 Approach: Backtracking / Recursion
+cpp
+CopyEdit
+void helper(int idx, vector<int>& candidates, int target, vector<int>& path, vector<vector<int>>& ans) {
+    if (target == 0) {
+        ans.push_back(path);
+        return;
+    }
+    if (idx == candidates.size() || target < 0) return;
+
+    // Include current index
+    if (candidates[idx] <= target) {
+        path.push_back(candidates[idx]);
+        helper(idx, candidates, target - candidates[idx], path, ans); // same idx
+        path.pop_back();
+    }
+
+    // Exclude and move to next index
+    helper(idx + 1, candidates, target, path, ans);
+}
+
+vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+    vector<vector<int>> ans;
+    vector<int> path;
+    helper(0, candidates, target, path, ans);
+    return ans;
+}
+💡 Key Ideas:
+Use recursion with backtracking.
+For each index: choose or skip.
+If we choose, stay at the same index to allow repetition.
+If we skip, move to next index.
+Prune paths where target becomes negative.
+⏱ Time Complexity:
+Exponential: O(2^T) where T is the target.
+Worst case: Trying all combinations.
+We try adding every candidate repeatedly — hence the exponential growth.
+In terms of n = candidates.size() and T = target, a rough upper bound is: O(2^{T})
+For tighter bound (with pruning), it's approximately:
+O(k^t), where k=number of candidates, t=depth of recursionO(k^t), \text{ where } k = \text{number of candidates},\ t = \text{depth of recursion}O(kt), where k=number of candidates, t=depth of recursion
+🧠 Space Complexity:
+O(T) (recursive stack depth) + O(# of combinations × avg length) for the result
+O(T) due to recursive calls and path vector (maximum depth = target / smallest candidate).
+Final result size depends on how many valid combinations are found, which can be large in worst case.
