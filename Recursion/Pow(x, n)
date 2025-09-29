@@ -1,0 +1,41 @@
+💡 Leetcode 50: Pow(x, n)
+link: https://leetcode.com/problems/powx-n/description/
+Implement pow(x, n) which calculates xⁿ.
+📌 Constraints:
+x ∈ (-100.0, 100.0)
+n ∈ [−2³¹, 2³¹−1]
+Either x ≠ 0 or n > 0
+−10⁴ ≤ xⁿ ≤ 10⁴
+Examples:
+Input: x = 2.00000, n = 10 → Output: 1024.00000
+Input: x = 2.10000, n = 3 → Output: 9.26100
+Input: x = 2.00000, n = -2 → Output: 0.25000
+✍️ Implement efficiently.
+
+🔑 Idea: Binary Exponentiation (Fast Exponentiation)
+Reduce time from O(n) ➝ O(log n) using divide & conquer.
+Handle negative n by computing reciprocal:
+x⁻ⁿ = 1 / xⁿ
+✅ C++ Code:
+double myPow(double x, int n) {
+    long long N = n;
+    if (N < 0) {
+        x = 1 / x;
+        N = -N;
+    }
+    double result = 1;
+    while (N > 0) {
+        if (N % 2 == 1)
+            result *= x;
+        x *= x;
+        N /= 2;
+    }
+    return result;
+}
+🧠 Why Binary Exponentiation?
+We divide the power by 2 at each step and square the base.
+This reduces computation dramatically.
+Handles large n and even negative powers properly.
+Tags: Math, Binary Exponentiation, Divide and Conquer, Medium
+Time: O(log n)
+Space: O(1)
