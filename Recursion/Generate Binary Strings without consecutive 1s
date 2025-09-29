@@ -1,0 +1,73 @@
+🔁 Recursion – Generate Binary Strings without consecutive 1s
+link: https://www.geeksforgeeks.org/problems/consecutive-1s-not-allowed1912/1
+📥 Input: n = 3
+📤 Output: ["000", "001", "010", "100", "101"]
+✅ Tags: recursion, binary, string, backtracking
+How to avoid consecutive 1s? What should be the base and recursive steps?
+
+🧠 Idea:
+Keep adding '0' freely.
+Only add '1' if the last char is not '1' (to avoid 11).
+🔩 Code:
+cpp
+CopyEdit
+void solve(int n, string s, vector<string> &res) {
+    if (n == 0) {
+        res.push_back(s);
+        return;
+    }
+    solve(n - 1, s + "0", res);  // always allowed
+    if (s.empty() || s.back() != '1')  // avoid consecutive 1s
+        solve(n - 1, s + "1", res);
+}
+📞 Call it like:
+cpp
+CopyEdit
+vector<string> res;
+solve(n, "", res);
+sort(res.begin(), res.end()); // lexicographic order
+🧠 Example:
+n = 2 → ["00", "01", "10"]
+n = 3 → ["000", "001", "010", "100", "101"]
+🕒 Time Complexity: O(2^n) (but fewer due to skip of "11")
+📦 Space: O(n) recursion + result array 
+
+or
+
+🔩 Code (Pass-by-Reference):
+cpp
+CopyEdit
+void solve(int n, string &s, vector<string> &res) {
+    if (n == 0) {
+        res.push_back(s);
+        return;
+    }
+
+    // Add '0' (always allowed)
+    s.push_back('0');
+    solve(n - 1, s, res);
+    s.pop_back();
+
+    // Add '1' only if last char is not '1'
+    if (s.empty() || s.back() != '1') {
+        s.push_back('1');
+        solve(n - 1, s, res);
+        s.pop_back();
+    }
+}
+📞 Call like this:
+cpp
+CopyEdit
+vector<string> res;
+string s;
+solve(n, s, res);
+sort(res.begin(), res.end());
+🧪 Example:
+n = 2 → ["00", "01", "10"]
+n = 3 → ["000", "001", "010", "100", "101"]
+🧠 Why pass-by-reference?
+Faster: avoids copying string and vector again and again.
+Use s.pop_back() to undo choice → backtracking.
+Saves memory and improves recursion performance.
+🕒 Time Complexity: O(2^n)
+📦 Space: O(n) (recursion depth)
