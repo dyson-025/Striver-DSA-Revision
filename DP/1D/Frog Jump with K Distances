@@ -1,0 +1,167 @@
+🐸 Frog Jump with K Distances – Detailed DP Notes
+1️⃣ Problem Statement
+
+Frog wants to reach stair N-1 from stair 0.
+
+Allowed to jump up to K steps at a time.
+
+Example: K = 4 → frog can jump 1, 2, 3, or 4 steps.
+
+Each stair has a height, height[N].
+
+Energy cost for a jump:
+
+cost from stair i → j
+
+cost from stair i → j=∣height[i]−height[j]∣
+
+Goal: Minimize total energy to reach the last stair.
+
+2️⃣ Why DP?
+
+Greedy fails: taking locally minimal energy may lead to higher total energy later.
+
+Overlapping subproblems: f(i) depends on f(i-1), f(i-2), … f(i-K)
+
+Solution: Dynamic Programming (Memoization or Tabulation).
+
+3️⃣ Recurrence Relation
+
+Let f(i) = minimum energy to reach stair i.
+
+(f(i−j)+∣height[i]−height[i−j]∣)for i−j≥0
+
+Base Case:
+
+f(0)=0
+
+Explanation:
+
+For each stair i, try all possible jumps from 1 → K.
+
+Take the minimum energy among all possible previous jumps.
+
+4️⃣ Recursive Approach (Conceptual)
+function f(i):
+    if i == 0: return 0
+    mmSteps = ∞
+    for j = 1 to K:
+        if i-j >= 0:
+            mmSteps = min(mmSteps, f(i-j) + abs(height[i]-height[i-j]))
+    return mmSteps
+
+
+Drawback: exponential time due to recomputation → use memoization.
+
+5️⃣ Memoization (Top-Down DP)
+
+Steps:
+
+Create dp[N] initialized to -1.
+
+Before computing f(i), check dp[i] != -1 → return stored value.
+
+After computing, store the result in dp[i].
+
+C++ Code:
+
+int solveUtil(int ind, vector<int>& height, vector<int>& dp, int k) {
+    if(ind == 0) return 0;
+    if(dp[ind] != -1) return dp[ind];
+
+    int mmSteps = INT_MAX;
+    for(int j = 1; j <= k; j++){
+        if(ind-j >= 0){
+            int jump = solveUtil(ind-j, height, dp, k) + abs(height[ind]-height[ind-j]);
+            mmSteps = min(mmSteps, jump);
+        }
+    }
+    return dp[ind] = mmSteps;
+}
+
+int solve(int n, vector<int>& height, int k) {
+    vector<int> dp(n, -1);
+    return solveUtil(n-1, height, dp, k);
+}
+
+
+Complexity:
+
+Time: O(N*K) → N subproblems, each checks K jumps
+
+Space: O(N) → dp array + recursion stack
+
+6️⃣ Tabulation (Bottom-Up DP)
+
+Algorithm:
+
+Initialize: dp[0] = 0
+
+Iterate i = 1 → N-1
+
+For each i, try jumps 1 → K and compute:
+
+dp[i]=min(dp[i−j]+∣height[i]−height[i−j]∣)
+
+Return dp[N-1]
+
+C++ Code:
+
+int solve(int n, vector<int>& height, int k){
+    vector<int> dp(n, 0);
+    dp[0] = 0;
+    for(int i = 1; i < n; i++){
+        int mmSteps = INT_MAX;
+        for(int j = 1; j <= k; j++){
+            if(i-j >= 0){
+                mmSteps = min(mmSteps, dp[i-j] + abs(height[i]-height[i-j]));
+            }
+        }
+        dp[i] = mmSteps;
+    }
+    return dp[n-1];
+}
+
+
+Complexity:
+
+Time: O(N*K)
+
+Space: O(N)
+
+7️⃣ Space Optimization
+
+If K is small → can use last K values instead of full dp array.
+
+Maintain a deque or circular buffer of size K.
+
+For very large K → space optimization is tricky because you need all previous K states.
+
+8️⃣ Key Points & Tips
+
+Base Case: f(0) = 0
+
+Loop carefully: ensure i-j >= 0 before accessing dp[i-j].
+
+Memoization → Top-Down: easy to write and debug.
+
+Tabulation → Bottom-Up: iterative, avoids recursion stack.
+
+Time Complexity: O(N*K), Space Complexity: O(N)
+
+9️⃣ Example
+height = [30, 10, 60, 10, 60, 50]
+K = 2
+
+
+Minimum energy path = 0 → 1 → 3 → 5
+
+Energy = |30-10| + |10-10| + |10-50| = 20 + 0 + 30 = 50 (example check)
+
+Actual DP computes and finds the minimum possible, possibly via a different path.
+
+🔹 Recap Table
+Approach	Time	Space
+Memoization	O(N*K)	O(N)
+Tabulation	O(N*K)	O(N)
+Space Opt	O(N*K)	O(K) (optional using deque)
