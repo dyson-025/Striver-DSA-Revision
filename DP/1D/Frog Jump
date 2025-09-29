@@ -1,0 +1,166 @@
+🐸 Frog Jump – DP Revision Notes
+ link: https://www.geeksforgeeks.org/problems/geek-jump/1
+🔹 Problem Statement
+
+Frog wants to jump from stair 0 → stair N-1.
+
+Can jump 1 step or 2 steps at a time.
+
+height[N] array is given.
+
+Energy cost for a jump: abs(height[i] - height[j]).
+
+Goal: Minimize total energy to reach stair N-1.
+
+🔹 Why Not Greedy?
+
+Choosing the locally minimum jump may lead to higher total energy later.
+
+Must consider all possible paths → DP is needed.
+
+🔹 Recursive Approach
+
+Steps:
+
+Express problem in terms of indexes: f(i) = min energy to reach stair i.
+
+Choices:
+
+Jump 1 step: f(i-1) + abs(height[i]-height[i-1])
+
+Jump 2 steps: f(i-2) + abs(height[i]-height[i-2]) (if i>1)
+
+Return minimum of the two choices.
+
+Base Case:
+
+f(0) = 0
+
+✅ Memoization (Top-Down DP)
+
+Store results in dp[] array to avoid recomputation.
+
+C++ Code:
+
+int solve(int ind, vector<int>& height, vector<int>& dp){
+    if(ind==0) return 0;
+    if(dp[ind]!=-1) return dp[ind];
+
+    int jumpOne = solve(ind-1,height,dp) + abs(height[ind]-height[ind-1]);
+    int jumpTwo = INT_MAX;
+    if(ind>1) 
+        jumpTwo = solve(ind-2,height,dp) + abs(height[ind]-height[ind-2]);
+
+    return dp[ind] = min(jumpOne, jumpTwo);
+}
+
+
+⏱ Time: O(N)
+📦 Space: O(N) (recursion stack + dp array)
+
+✅ Tabulation (Bottom-Up DP)
+
+Iteratively fill dp[] from 0 → N-1.
+
+C++ Code:
+
+dp[0] = 0;
+for(int i=1; i<n; i++){
+    int jumpOne = dp[i-1] + abs(height[i]-height[i-1]);
+    int jumpTwo = (i>1) ? dp[i-2] + abs(height[i]-height[i-2]) : INT_MAX;
+    dp[i] = min(jumpOne, jumpTwo);
+}
+
+
+⏱ Time: O(N)
+📦 Space: O(N)
+
+✅ Space Optimized DP
+
+Only prev and prev2 values are needed at each step.
+
+C++ Code:
+
+int prev = 0, prev2 = 0;
+for(int i=1; i<n; i++){
+    int jumpOne = prev + abs(height[i]-height[i-1]);
+    int jumpTwo = (i>1) ? prev2 + abs(height[i]-height[i-2]) : INT_MAX;
+    int cur = min(jumpOne, jumpTwo);
+    prev2 = prev;
+    prev = cur;
+}
+cout << prev;
+
+
+⏱ Time: O(N)
+📦 Space: O(1)
+
+🔹 Key Takeaways
+
+Problem is like Climbing Stairs, but now with cost/energy.
+
+Always check base cases: i=0 and i=1.
+
+Greedy fails, must explore all paths → DP.
+
+Space optimization works by tracking only last 2 states.
+
+✅ Recurrence Relation:
+
+f(i)=min(f(i−1)+∣h[i]−h[i−1]∣, f(i−2)+∣h[i]−h[i−2]∣)
+f(0)=0
+
+Perfect! Here’s a flowchart for the Frog Jump DP problem—easy to memorize and perfect for revision.
+
+🐸 Frog Jump – Flowchart (Space Optimized DP)
+Start → Input n, height[]
+      |
+      v
+Is n = 0? ──Yes──> return 0
+      |
+      No
+      |
+      v
+Initialize:
+  prev2 = 0   // f(0)
+  prev  = 0   // will calculate for i=1
+      |
+      v
+For i = 1 to n-1:
+      |
+      v
+  jumpOne = prev + abs(height[i]-height[i-1])
+  jumpTwo = (i>1) ? prev2 + abs(height[i]-height[i-2]) : INF
+  cur = min(jumpOne, jumpTwo)
+  prev2 = prev
+  prev = cur
+      |
+      v
+Loop ends → return prev
+      |
+      v
+End
+
+🔹 Flow Explanation
+
+Base Case:
+
+If n=0, energy = 0.
+
+Initialize Variables:
+
+prev2 = f(0) = 0
+
+prev = f(1) will be calculated in the first iteration.
+
+Iterate from i = 1 to n-1:
+
+jumpOne = jump from previous stair
+
+jumpTwo = jump from two stairs behind (if i>1)
+
+cur = min(jumpOne, jumpTwo) → minimum energy for current stair
+
+Update prev2 & prev for next iteration
+
+Return final answer → prev
