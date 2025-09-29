@@ -1,0 +1,173 @@
+🚀 Climbing Stairs – DP Revision Notes
+ https://leetcode.com/problems/climbing-stairs/
+🔹 Problem Statement
+
+You are given n stairs (0 → N).
+
+At each step, you can climb 1 stair or 2 stairs.
+
+Find total distinct ways to reach the Nth stair.
+
+🔹 How to Identify DP Problem?
+
+Count total number of ways → Strong hint for DP.
+
+Can be solved via choices at each step.
+
+Overlapping subproblems (f(n) depends on f(n-1) & f(n-2)).
+
+🔹 Steps to Solve
+
+Represent problem in terms of index (n).
+
+Choices:
+
+Jump 1 step → f(n-1)
+
+Jump 2 steps → f(n-2)
+
+Since question asks count of ways → take sum.
+
+👉 Recurrence Relation:
+
+𝑓
+(
+𝑛
+)
+=
+𝑓
+(
+𝑛
+−
+1
+)
++
+𝑓
+(
+𝑛
+−
+2
+)
+f(n)=f(n−1)+f(n−2)
+
+Base Cases:
+
+f(0) = 1 (1 way: stay at ground).
+
+f(1) = 1 (1 way: single jump).
+
+⚠️ Edge case: Don’t allow f(-1) → handled by base case.
+
+🔹 Recursive Approach
+
+Exponential time (re-computation).
+
+Equivalent to Fibonacci recursion.
+
+🔹 DP Approaches
+1️⃣ Tabulation (Bottom-Up DP)
+
+Use dp[] array.
+
+Transition: dp[i] = dp[i-1] + dp[i-2].
+
+Code (C++):
+
+int climbStairs(int n) {
+    vector<int> dp(n+1, 0);
+    dp[0] = dp[1] = 1;
+    for(int i=2; i<=n; i++){
+        dp[i] = dp[i-1] + dp[i-2];
+    }
+    return dp[n];
+}
+
+
+⏱ Time: O(N)
+📦 Space: O(N)
+
+2️⃣ Space Optimized DP
+
+Only last two values are needed.
+
+Use variables prev and prev2.
+
+Code (C++):
+
+int climbStairs(int n) {
+    int prev2 = 1, prev = 1;
+    for(int i=2; i<=n; i++){
+        int cur = prev + prev2;
+        prev2 = prev;
+        prev = cur;
+    }
+    return prev;
+}
+
+
+⏱ Time: O(N)
+📦 Space: O(1)
+
+🔹 Key Takeaways
+
+Problem is identical to Fibonacci sequence shifted by index.
+
+Always check base cases (n=0, n=1) carefully.
+
+For large n, always use DP / Space Optimized version.
+
+✅ Final Formula:
+f(n)=f(n−1)+f(n−2),f(0)=1,f(1)=1
+
+🪜 Climbing Stairs DP – Flowchart
+Start → Input n
+      |
+      v
+Is n = 0 or n = 1? ──Yes──> return 1
+      |
+      No
+      |
+      v
+Initialize:
+  prev2 = 1   (f(0))
+  prev  = 1   (f(1))
+      |
+      v
+For i = 2 to n:
+      |
+      v
+    cur = prev + prev2   // f(i) = f(i-1) + f(i-2)
+      |
+      v
+    prev2 = prev
+    prev  = cur
+      |
+      v
+Loop ends → return prev
+      |
+      v
+End
+
+🔹 Flow Explanation
+
+Check Base Cases:
+
+n=0 → 1 way
+
+n=1 → 1 way
+
+Initialize DP variables:
+
+prev2 = f(0)
+
+prev = f(1)
+
+Iterate from 2 to n:
+
+cur = prev + prev2 (sum of last two ways)
+
+Update prev2 & prev for next iteration
+
+Return final answer (prev)
+
+✅ This is exactly the space-optimized approach, visually easy to memorize.
