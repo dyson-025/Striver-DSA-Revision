@@ -1,0 +1,39 @@
+🔁 Recursion – Generate All Binary Strings
+link: https://www.geeksforgeeks.org/problems/generate-all-binary-strings/1
+Given a number n, print all binary strings of length n.
+✅ Tags: Recursion, Backtracking, Binary, String Generation, Easy
+❓ What is the base case?
+❓ How to form the recursive calls?
+
+👨‍💻 Intuition:
+At every index, you have two choices: put 0 or put 1.
+Recursively build the string character by character.
+📌 Base Case:
+If n == 0, print the string and return.
+🔁 Recursive Steps:
+cpp
+CopyEdit
+void generateBinaryStrings(int n, string current) {
+    if (n == 0) {
+        cout << current << endl;
+        return;
+    }
+
+    // Choice 1: Add '0'
+    generateBinaryStrings(n - 1, current + "0");
+
+    // Choice 2: Add '1'
+    generateBinaryStrings(n - 1, current + "1");
+}
+📞 Initial Call:
+generateBinaryStrings(n, "")
+📌 Example:
+Input: n = 2
+Output:
+CopyEdit
+00  
+01  
+10  
+11
+🕒 Time Complexity: O(2^n)
+📦 Space Complexity: O(n) (for recursion stack)
