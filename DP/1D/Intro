@@ -1,0 +1,115 @@
+📘 Dynamic Programming (DP) – Revision Notes
+🔹 What is DP?
+
+Definition: A method to solve problems by storing answers of subproblems to avoid recomputation.
+
+When to use:
+
+Problem has overlapping subproblems.
+
+Problem has an optimal substructure (bigger problem can be solved from smaller ones).
+
+🔹 Two Approaches in DP
+1. Memoization (Top-Down)
+
+Recursion + storage (cache results).
+
+Solve from main problem → base case.
+
+Store computed results in an array/map → reuse instead of recalculating.
+
+Steps:
+
+Create dp[n+1] initialized with -1.
+
+Before solving, check if dp[n] != -1.
+
+If not solved, compute recursively and store result in dp[n].
+
+Time Complexity: O(N)
+Space Complexity: O(N) (array + recursion stack)
+
+2. Tabulation (Bottom-Up)
+
+Iterative approach.
+
+Solve from base cases → final answer.
+
+Fill up the dp[] array step by step.
+
+Steps:
+
+Create dp[n+1].
+
+Initialize base cases (dp[0], dp[1]).
+
+Loop from 2 → n, and compute dp[i] = dp[i-1] + dp[i-2].
+
+Time Complexity: O(N)
+Space Complexity: O(N) (only dp array)
+
+3. Space Optimization
+
+Observation:
+For Fibonacci dp[i] = dp[i-1] + dp[i-2], only last two values are required.
+
+Instead of keeping whole array, store only prev and prev2.
+
+Steps:
+
+Initialize prev2 = 0, prev = 1.
+
+Loop i=2 → n:
+
+cur = prev + prev2
+
+Update: prev2 = prev, prev = cur
+
+Final answer = prev.
+
+Time Complexity: O(N)
+Space Complexity: O(1) (only 2 variables)
+
+🔹 Example – Fibonacci
+Recurrence Relation:
+f(n) = f(n-1) + f(n-2)
+Base cases: f(0)=0, f(1)=1
+
+Memoization Code (C++):
+int f(int n, vector<int>& dp){
+    if(n <= 1) return n;
+    if(dp[n] != -1) return dp[n];
+    return dp[n] = f(n-1, dp) + f(n-2, dp);
+}
+
+Tabulation Code (C++):
+vector<int> dp(n+1);
+dp[0] = 0, dp[1] = 1;
+for(int i=2; i<=n; i++){
+    dp[i] = dp[i-1] + dp[i-2];
+}
+return dp[n];
+
+Space Optimized Code (C++):
+int prev2 = 0, prev = 1;
+for(int i=2; i<=n; i++){
+    int cur = prev + prev2;
+    prev2 = prev;
+    prev = cur;
+}
+return prev;
+
+🔹 Key Takeaways
+
+Memoization → Top-down recursion + cache (simpler to write, but stack heavy).
+
+Tabulation → Bottom-up iterative (no recursion, uses array).
+
+Space Optimization → Use minimal variables if only last few states matter.
+
+⚡ Always check:
+
+Overlapping Subproblems
+
+Optimal Substructure
+→ If yes → Apply DP.
