@@ -1,0 +1,113 @@
+ Given a digit string (e.g. "23"), return all possible letter combinations like on a phone keypad.
+link: https://leetcode.com/problems/letter-combinations-of-a-phone-number/description/
+✅ Tags: recursion, backtracking, mapping, medium
+📌 What’s the base case?
+📌 How do you use the digit → letters mapping?
+
+🔠 Mapping:
+'2' → "abc"  
+'3' → "def"  
+'4' → "ghi"  
+'5' → "jkl"  
+'6' → "mno"  
+'7' → "pqrs"  
+'8' → "tuv"  
+'9' → "wxyz"
+
+🔠 Mapping:
+'2' → "abc"  
+'3' → "def"  
+'4' → "ghi"  
+'5' → "jkl"  
+'6' → "mno"  
+'7' → "pqrs"  
+'8' → "tuv"  
+'9' → "wxyz"
+🧠 Logic:
+
+For each digit, try all mapped characters one by one
+
+
+Build the current string recursivelly.
+
+When index == digits.size(), push to result
+🔩 Code (Pass-by-Reference):
+CopyEdit
+void backtrack(int i, string &digits, string &cur, vector<string> &res, vector<string> &map) {
+    if (i == digits.size()) {
+        if (!cur.empty()) res.push_back(cur);
+        return;
+    }
+
+    for (char c : map[digits[i] - '0']) {
+        cur.push_back(c);
+        backtrack(i + 1, digits, cur, res, map);
+        cur.pop_back();  // backtrack
+    }
+}
+📞 Initial call:
+cpp
+CopyEdit
+vector<string> letterCombinations(string digits) {
+    if (digits.empty()) return {};
+
+    vector<string> map = {
+        "", "", "abc", "def", "ghi", "jkl",
+        "mno", "pqrs", "tuv", "wxyz"
+    };
+
+    vector<string> res;
+    string cur;
+    backtrack(0, digits, cur, res, map);
+    return res;
+}
+🧪 Dry Run: digits = "23"
+Digit	Options
+2	a, b, c
+3	d, e, f
+→ Try all combinations:
+
+"a" + d/e/f → "ad", "ae", "af"
+
+
+"b" + d/e/f → "bd", "be", "bf"
+
+
+"c" + d/e/f → "cd", "ce", "cf"
+
+✅ Output: ["ad","ae","af","bd","be","bf","cd","ce","cf"]
+🕒 Time Complexity: O(3^n to 4^n) depending on digits
+📦 Space Complexity: O(n) recursion depth + result
+ or
+class Solution {
+public:
+    vector<string> letterCombinations(string digits) {
+        if (digits.empty()) return {};
+
+        unordered_map<char, string> mpp = {
+            {'2',"abc"}, {'3',"def"}, {'4',"ghi"}, {'5',"jkl"},
+            {'6',"mno"}, {'7',"pqrs"}, {'8',"tuv"}, {'9',"wxyz"}
+        };
+
+        vector<string> result;
+        string temp;
+        backtrack(0, digits, mpp, temp, result);
+        return result;
+    }
+
+private:
+    void backtrack(int index, string& digits, unordered_map<char, string>& mpp,
+                   string& temp, vector<string>& result) {
+        if (index == digits.length()) {
+            result.push_back(temp);
+            return;
+        }
+
+        string letters = mpp[digits[index]];
+        for (char ch : letters) {
+            temp.push_back(ch);
+            backtrack(index + 1, digits, mpp, temp, result);
+            temp.pop_back();  // backtrack
+        }
+    }
+};
