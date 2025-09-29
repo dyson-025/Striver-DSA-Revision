@@ -1,0 +1,118 @@
+🏠 House Robber II (Circular Street) – DP 6
+ link:https://leetcode.com/problems/house-robber-ii/description/
+🔹 Problem Statement
+
+A thief wants to rob houses arranged in a circle.
+
+Rule: Cannot rob two adjacent houses (security alarm).
+
+Goal: Maximize stolen money.
+
+Input: Arr[] = money in houses.
+Output: Max money without alerting police.
+
+🔹 Key Difference from DP5 (Maximum Sum of Non-Adjacent Elements)
+
+In DP5 (linear street) → only adjacency matters.
+
+In DP6 (circular street) → first and last houses are also adjacent.
+
+That means thief cannot take both first and last house together.
+
+🔹 Strategy (Main Idea)
+
+We split the problem into two cases:
+
+Exclude the last house → Rob from houses[0 … n-2]
+→ Answer = ans1
+
+Exclude the first house → Rob from houses[1 … n-1]
+→ Answer = ans2
+
+👉 Final Answer = max(ans1, ans2)
+
+(This ensures first and last are never chosen together.)
+
+🔹 Subproblem (DP5 Recap)
+
+For a given linear street arr[], we need:
+
+f(i)=max(f(i−1), arr[i]+f(i−2))
+
+f(i-1) → don’t rob current
+
+arr[i] + f(i-2) → rob current
+
+Base Cases:
+
+f(0) = arr[0]
+
+f(1) = max(arr[0], arr[1])
+
+🔹 Implementation (C++ Code)
+long long int solve(vector<int>& arr) {
+    int n = arr.size();
+    long long int prev = arr[0];
+    long long int prev2 = 0;
+
+    for(int i=1; i<n; i++){
+        long long int pick = arr[i];
+        if(i > 1) pick += prev2;
+        long long int nonPick = prev;
+
+        long long int cur_i = max(pick, nonPick);
+        prev2 = prev;
+        prev = cur_i;
+    }
+    return prev;
+}
+
+long long int robStreet(int n, vector<int> &arr) {
+    if(n == 1) return arr[0];
+
+    vector<int> arr1, arr2;
+    for(int i=0; i<n; i++) {
+        if(i != 0) arr1.push_back(arr[i]);     // exclude first
+        if(i != n-1) arr2.push_back(arr[i]);   // exclude last
+    }
+
+    long long int ans1 = solve(arr1);
+    long long int ans2 = solve(arr2);
+
+    return max(ans1, ans2);
+}
+
+int main() {
+    vector<int> arr{1,5,1,2,6};
+    int n = arr.size();
+    cout << robStreet(n, arr);  // Output: 11
+}
+
+🔹 Complexity Analysis
+
+Time: O(N) → each subarray solved in O(N), total still O(N).
+
+Space: O(1) → only variables prev and prev2.
+
+🔹 Dry Run Example
+
+Input: arr = [1, 5, 1, 2, 6]
+
+Case 1 (exclude last → [1, 5, 1, 2]):
+
+Max = 5 + 2 = 7
+
+Case 2 (exclude first → [5, 1, 2, 6]):
+
+Max = 5 + 6 = 11
+
+👉 Final Answer = max(7, 11) = 11 ✅
+
+🔹 Summary
+Problem Type	Trick Used
+Linear (DP5)	Standard House Robber (non-adjacent max sum)
+Circular (DP6)	Break into 2 cases (exclude first, exclude last)
+
+Formula:
+
+Answer=max(rob(arr[0…n−2]), rob(arr[1…n−1]))
