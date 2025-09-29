@@ -1,0 +1,43 @@
+Q: What is the approach to solve "Combination Sum III" (k numbers that add up to n using 1 to 9, no repetition)?
+link: https://leetcode.com/problems/combination-sum-iii/description/
+A:
+Problem Summary:
+Find all unique combinations of k numbers that add up to n, using numbers from 1 to 9 exactly once.
+Approach (Backtracking):
+Use backtracking to explore all possible number combinations.
+Start from 1 to 9, only pick numbers greater than the last one to avoid duplicates.
+Maintain:
+A path storing current numbers,
+A sum of the path,
+A starting number to avoid repetition.
+Backtrack Logic:
+cpp
+CopyEdit
+void backtrack(int start, int k, int n, vector<int>& path, vector<vector<int>>& res) {
+    if (path.size() == k && n == 0) {
+        res.push_back(path);
+        return;
+    }
+    for (int i = start; i <= 9; ++i) {
+        if (i > n) break; // prune
+        path.push_back(i);
+        backtrack(i + 1, k, n - i, path, res);
+        path.pop_back();
+    }
+}
+Main Function:
+cpp
+CopyEdit
+vector<vector<int>> combinationSum3(int k, int n) {
+    vector<vector<int>> res;
+    vector<int> path;
+    backtrack(1, k, n, path, res);
+    return res;
+}
+Key Concepts:
+Backtracking
+No repetition
+Pruning with if (i > n) break;
+Numbers only from 1 to 9
+Time Complexity: O(2⁹)
+Space Complexity: O(k) for recursion stack + output
