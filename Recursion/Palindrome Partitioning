@@ -1,0 +1,109 @@
+vvi
+🧠 131. Palindrome Partitioning
+
+link: https://leetcode.com/problems/palindrome-partitioning/description/
+Given a string s, return all possible palindrome partitionings of s.
+Each substring in a partition must be a palindrome.
+Return all possible partitions.
+Example:
+Input: "aab"
+Output: [["a","a","b"],["aa","b"]]
+
+🔧 Approach:
+Use Backtracking + Palindrome Checking
+📌 Steps:
+Start from index 0.
+For every index i from start to s.length():
+Check if s[start...i] is a palindrome.
+If yes, include it in the path and recur for the rest.
+Backtrack after recursion.
+🧠 Key Logic:
+Try every prefix that is a palindrome, recursively solve for the suffix.
+🧩 Code (C++):
+cpp
+CopyEdit
+class Solution {
+public:
+    vector<vector<string>> res;
+
+    bool isPalindrome(string& s, int left, int right) {
+        while (left < right) {
+            if (s[left++] != s[right--]) return false;
+        }
+        return true;
+    }
+
+    void backtrack(string& s, int start, vector<string>& path) {
+        if (start == s.size()) {
+            res.push_back(path);
+            return;
+        }
+
+        for (int end = start; end < s.size(); end++) {
+            if (isPalindrome(s, start, end)) {
+                path.push_back(s.substr(start, end - start + 1));
+                backtrack(s, end + 1, path);
+                path.pop_back(); // backtrack
+            }
+        }
+    }
+
+    vector<vector<string>> partition(string s) {
+        vector<string> path;
+        backtrack(s, 0, path);
+        return res;
+    }
+};
+⏱ Time Complexity:
+O(2ⁿ × n) — for generating all partitions and palindrome checks.
+📦 Space Complexity:
+O(n) — recursion + path
+
+What is the step-by-step backtracking flow for the input string "aab"?
+Back (Answer):
+🔄 Input: "aab"
+🔧 Initial Call:
+backtrack(s = "aab", start = 0, path = [])
+✅ Step-by-step Backtracking Tree:
+pgsql
+CopyEdit
+Start = 0  
+→ "a" is a palindrome → path = ["a"]
+
+  Start = 1  
+  → "a" is a palindrome → path = ["a", "a"]
+
+    Start = 2  
+    → "b" is a palindrome → path = ["a", "a", "b"]
+
+      Start = 3 (end reached)  
+      ✅ Add ["a", "a", "b"] to result
+
+    🔙 Backtrack: remove "b" → path = ["a", "a"]
+
+  🔙 Backtrack: remove "a" → path = ["a"]
+
+  → "ab" is not a palindrome → skip
+
+🔙 Backtrack: remove "a" → path = []
+
+→ "aa" is a palindrome → path = ["aa"]
+
+  Start = 2  
+  → "b" is a palindrome → path = ["aa", "b"]
+
+    Start = 3 (end reached)  
+    ✅ Add ["aa", "b"] to result
+
+🔙 Backtrack: remove "b", then "aa"
+✅ Final Result:
+cpp
+CopyEdit
+[
+  ["a", "a", "b"],
+  ["aa", "b"]
+]
+🧠 Learning Tip:
+Check palindromes from start to end
+Recur on the suffix
+Backtrack after every recursive call
