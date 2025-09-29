@@ -1,0 +1,83 @@
+Q: How do you sort a stack using recursion (no extra data structures allowed except the call stack)?
+link: https://www.geeksforgeeks.org/problems/sort-a-stack/1
+🧠 You are given a stack of integers. Sort it in ascending order using only recursion and the stack itself.
+🔁 Do not use any loops or extra stack/array. 
+or
+Q: Dry run: How does recursion sort the stack [3, 1, 4, 2] (top to bottom)?
+Use only recursion (no loops or extra data structures).
+Explain step-by-step how the stack is sorted using sortStack() and insertInSortedOrder().
+
+✅ Recursive Intuition
+We use two functions:
+sortStack(stack) → Recursively sorts the stack
+insertInSortedOrder(stack, element) → Inserts element in correct position
+✅ Code (C++ Beginner-Friendly)
+cpp
+CopyEdit
+void insertInSortedOrder(stack<int>& s, int element) {
+    // Base case: stack is empty or top element is smaller
+    if (s.empty() || s.top() <= element) {
+        s.push(element);
+        return;
+    }
+
+    // Remove top and recur
+    int topElement = s.top();
+    s.pop();
+    insertInSortedOrder(s, element);
+
+    // Put back the top element
+    s.push(topElement);
+}
+
+void sortStack(stack<int>& s) {
+    // Base case: 0 or 1 element
+    if (s.empty() || s.size() == 1) return;
+
+    // Remove top element
+    int topElement = s.top();
+    s.pop();
+
+    // Sort remaining stack
+    sortStack(s);
+
+    // Insert in sorted order
+    insertInSortedOrder(s, topElement);
+}
+🧠 How it works:
+Think like selection sort: take out one element, sort the rest, then insert it back in correct position.
+Recursion handles both "sort" and "insert" parts using stack’s own memory.
+🕒 Time Complexity: O(N²)
+💾 Space Complexity: O(N) due to recursion call stack 
+or solution
+We want to sort stack [3, 1, 4, 2] from top to bottom using recursion.
+📚 Step-by-step Dry Run
+Initial Stack:
+Top → [3, 1, 4, 2] ← Bottom
+🔁 sortStack() Steps (Peeling Phase):
+Pop 3 → sort [1, 4, 2]
+Pop 1 → sort [4, 2]
+Pop 4 → sort [2]
+Pop 2 → now empty → return
+🔁 insertInSortedOrder() Steps (Rebuilding Phase):
+Now insert elements back in sorted order:
+Insert 2 → stack: [2]
+Insert 4
+top 2 < 4 → push → [2, 4]
+Insert 1
+top 4 > 1 → pop
+top 2 > 1 → pop
+stack empty → push 1 → [1]
+push 2 → [1, 2]
+push 4 → [1, 2, 4]
+Insert 3
+top 4 > 3 → pop
+top 2 < 3 → push → [1, 2, 3]
+push 4 → [1, 2, 3, 4]
+✅ Final Sorted Stack:
+Top → [1, 2, 3, 4] ← Bottom
+📌 Summary
+You recursively remove all elements → base case: empty stack
+Then insert them back one by one in the correct position using another recursion
+Think of it like:
+Peel → sort → insert back properly
