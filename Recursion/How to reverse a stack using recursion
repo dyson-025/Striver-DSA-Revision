@@ -1,0 +1,38 @@
+🔁 How to reverse a stack using recursion (without using any extra data structures)?
+link: https://www.geeksforgeeks.org/problems/reverse-a-stack/1
+Write approach + code (C++ preferred) + time & space complexity
+
+✅ Approach:
+Use recursion to pop all elements till the stack is empty.
+Then, while the stack is getting rebuilt, insert each popped element at the bottom using another recursive helper function.
+(No loops or extra stack used.)
+🔧 Code (C++):
+#include <stack>
+using namespace std;
+
+void insertAtBottom(stack<int>& st, int x) {
+    if (st.empty()) {
+        st.push(x);
+        return;
+    }
+
+    int top = st.top(); st.pop();
+    insertAtBottom(st, x);
+    st.push(top);
+}
+
+void reverseStack(stack<int>& st) {
+    if (st.empty()) return;
+
+    int top = st.top(); st.pop();
+    reverseStack(st);
+    insertAtBottom(st, top);
+}
+📌 Example:
+Input stack: [1, 2, 3, 4] (top = 4)
+Output after reverse: [4, 3, 2, 1] (top = 1)
+⏱️ Time Complexity:
+O(N^2)
+Because each insertAtBottom() takes O(N) in worst case, and it's called N times.
+🧠 Space Complexity:
+O(N) (due to recursion call stack)
