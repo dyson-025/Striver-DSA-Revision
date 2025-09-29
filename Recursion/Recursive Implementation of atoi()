@@ -1,0 +1,49 @@
+[LC 8] Write a beginner-friendly solution for myAtoi(string s) to convert a string to a 32-bit signed integer.
+link: https://leetcode.com/problems/string-to-integer-atoi/description/
+Follow these steps:
+Ignore leading whitespaces
+Detect optional '+' or '-'
+Read digits only
+Stop on first non-digit
+Clamp to [-2³¹, 2³¹ - 1] if out of range
+
+int myAtoi(string s) {
+    int index = 0;
+    int n = s.length();
+    int sign = 1;
+    long result = 0;  // Use long to handle overflow before clamping
+
+    // 1. Skip leading spaces
+    while (index < n && s[index] == ' ') {
+        index++;
+    }
+
+    // 2. Check for '+' or '-'
+    if (index < n && (s[index] == '+' || s[index] == '-')) {
+        if (s[index] == '-') {
+            sign = -1;
+        }
+        index++;
+    }
+
+    // 3. Read the digits
+    while (index < n && isdigit(s[index])) {
+        int digit = s[index] - '0';
+        result = result * 10 + digit;
+
+        // 4. Check for overflow and clamp
+        if (sign * result >= INT_MAX) {
+            return INT_MAX;
+        }
+        if (sign * result <= INT_MIN) {
+            return INT_MIN;
+        }
+
+        index++;
+    }
+
+    // 5. Apply the sign
+    return (int)(sign * result);
+}
+🧠 Time Complexity: O(n)
+💾 Space Complexity: O(1)
