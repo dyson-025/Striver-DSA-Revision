@@ -1,0 +1,62 @@
+🃏 Flashcard: LeetCode 40 - Combination Sum II
+link: https://leetcode.com/problems/combination-sum-ii/description/
+Q: How do you find all unique combinations where candidates sum to a target, each number used once (with duplicates in input)?
+✅ Problem Summary
+Given an array candidates[] (may contain duplicates) and a target value.
+Find all unique combinations where:
+Each number can be used at most once.
+The sum of numbers in a combination equals the target.
+Return combinations without duplicates.
+📌 Example
+Input:
+candidates = [10,1,2,7,6,1,5], target = 8
+Output:
+csharp
+CopyEdit
+[
+  [1,1,6],
+  [1,2,5],
+  [1,7],
+  [2,6]
+]
+✅ [1,2,5] is different from [2,1,5] only in order, so only one is kept.
+
+🔍 Approach: Backtracking + Sort + Skip Duplicates
+Sort the array to handle duplicates easily.
+Use backtracking to explore combinations.
+At each level:
+If candidates[i] > target, break (early pruning).
+If i > start && candidates[i] == candidates[i - 1], skip duplicate values at the same level.
+✅ C++ Code:
+cpp
+CopyEdit
+void backtrack(int start, vector<int>& candidates, int target, vector<int>& path, vector<vector<int>>& res) {
+    if (target == 0) {
+        res.push_back(path);
+        return;
+    }
+    for (int i = start; i < candidates.size(); ++i) {
+        if (i > start && candidates[i] == candidates[i - 1]) continue; // skip duplicates
+        if (candidates[i] > target) break; // prune
+        path.push_back(candidates[i]);
+        backtrack(i + 1, candidates, target - candidates[i], path, res);
+        path.pop_back();
+    }
+}
+
+vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+    sort(candidates.begin(), candidates.end());
+    vector<vector<int>> res;
+    vector<int> path;
+    backtrack(0, candidates, target, path, res);
+    return res;
+}
+🧠 Key Concepts:
+Sort first to skip duplicates.
+Backtrack with index i + 1 to avoid reusing the same number.
+Prune early if current number exceeds target.
+🧮 Time & Space:
+Time: O(2ⁿ), exponential (worst case all subsets explored)
+Space: O(n) recursion stack + result
+📎 Tags:
+Backtracking · Pruning · Duplicates · Subset Variants
