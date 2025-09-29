@@ -1,0 +1,169 @@
+💡 Maximum Sum of Non-Adjacent Elements – DP 5
+link: https://leetcode.com/problems/house-robber/
+1️⃣ Problem Statement
+
+Given an array arr[N] of positive integers.
+
+Find the maximum sum of a subsequence such that no two elements are adjacent.
+
+Subsequence: pick elements without changing order, some elements can be skipped.
+
+Example:
+
+arr = [2, 1, 4, 9]
+Maximum sum = 2 + 9 = 11
+
+2️⃣ Intuition
+
+At each index i, we have two choices:
+
+Pick arr[i] → then we cannot pick arr[i-1], so add arr[i] + f(i-2).
+
+Do not pick arr[i] → take f(i-1).
+
+Recurrence Relation:
+
+f(i)=max(f(i−1),arr[i]+f(i−2))
+
+Base Cases:
+
+f(0) = arr[0]
+
+f(-1) = 0 (when index goes negative)
+
+3️⃣ Recursive Approach (Conceptual)
+function f(i):
+    if i < 0: return 0
+    if i == 0: return arr[0]
+    
+    pick = arr[i] + f(i-2)
+    nonPick = f(i-1)
+    
+    return max(pick, nonPick)
+
+
+Simple, but exponential time due to recomputation → use memoization.
+
+4️⃣ Memoization (Top-Down DP)
+
+Steps:
+
+Create dp[N] initialized to -1.
+
+Before computing f(i), check dp[i] != -1 → return stored value.
+
+Store the result after computing.
+
+C++ Code:
+
+int solveUtil(int ind, vector<int>& arr, vector<int>& dp) {
+    if (ind < 0) return 0;
+    if (ind == 0) return arr[0];
+    if (dp[ind] != -1) return dp[ind];
+
+    int pick = arr[ind] + solveUtil(ind-2, arr, dp);
+    int nonPick = solveUtil(ind-1, arr, dp);
+
+    return dp[ind] = max(pick, nonPick);
+}
+
+int solve(int n, vector<int>& arr) {
+    vector<int> dp(n, -1);
+    return solveUtil(n-1, arr, dp);
+}
+
+
+Complexity:
+
+Time: O(N)
+
+Space: O(N) recursion stack + O(N) dp array → O(N)
+
+5️⃣ Tabulation (Bottom-Up DP)
+
+Algorithm:
+
+dp[0] = arr[0]
+
+For i = 1 → N-1:
+
+pick = arr[i] + dp[i-2] (if i > 1)
+
+nonPick = dp[i-1]
+
+dp[i] = max(pick, nonPick)
+
+Return dp[N-1]
+
+C++ Code:
+
+int solveUtil(int n, vector<int>& arr, vector<int>& dp) {
+    dp[0] = arr[0];
+    for(int i=1;i<n;i++){
+        int pick = arr[i];
+        if(i>1) pick += dp[i-2];
+        int nonPick = dp[i-1];
+        dp[i] = max(pick, nonPick);
+    }
+    return dp[n-1];
+}
+
+
+Complexity:
+
+Time: O(N)
+
+Space: O(N)
+
+6️⃣ Space Optimization
+
+At any index i, we only need:
+
+dp[i-1] → previous max sum
+
+dp[i-2] → max sum two steps back
+
+Maintain only two variables: prev and prev2.
+
+C++ Code:
+
+int solve(int n, vector<int>& arr) {
+    int prev = arr[0]; // dp[i-1]
+    int prev2 = 0;     // dp[i-2]
+
+    for(int i=1;i<n;i++){
+        int pick = arr[i] + (i>1 ? prev2 : 0);
+        int nonPick = prev;
+        int cur_i = max(pick, nonPick);
+        prev2 = prev;
+        prev = cur_i;
+    }
+
+    return prev;
+}
+
+
+Complexity:
+
+Time: O(N)
+
+Space: O(1)
+
+7️⃣ Key Points
+
+This is a classic pick/non-pick DP problem.
+
+Recurrence is very similar to Fibonacci with choice:
+
+dp[i]=max(dp[i−1],arr[i]+dp[i−2])
+
+Space optimization is easy: only last two states are needed.
+
+Can be extended to variants like house robber problem in LeetCode.
+
+✅ Summary Table
+
+Approach	Time	Space
+Memoization	O(N)	O(N)
+Tabulation	O(N)	O(N)
+Space Opt	O(N)	O(1)
