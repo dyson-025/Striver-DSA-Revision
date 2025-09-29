@@ -1,0 +1,116 @@
+LeetCode 79: Word Search (Medium)
+link: https://leetcode.com/problems/word-search/description/
+Given a 2D board and a word, find if the word exists in the grid.
+The word can be constructed from letters of sequentially adjacent cells, where "adjacent" cells are horizontally or vertically neighboring. The same letter cell may not be used more than once.
+Example:
+arduino
+CopyEdit
+board = [
+  ['A','B','C','E'],
+  ['S','F','C','S'],
+  ['A','D','E','E']
+]
+word = "ABCCED"  
+Output: true
+🧠 Can you explain the algorithm and dry run with backtracking?
+
+🔁 Approach: Backtracking (DFS)
+Try to start from every cell and explore in 4 directions (up, down, left, right).
+Steps:
+For each cell (i, j), if it matches the first character of word, call DFS.
+In DFS:
+Check if index == word.length() → return true.
+Boundary + char check.
+Mark visited (temporarily change board[i][j] to #).
+Explore 4 directions.
+Backtrack (restore original character).
+If any DFS call returns true → word exists.
+Time Complexity: O(N * M * 4^L)
+N x M → board size
+L → word length
+4^L → max DFS calls
+Space: O(L) recursion stack
+🧪 Dry Run (Anki-style)
+Input:
+mathematica
+CopyEdit
+board = [ 
+  [A, B, C, E], 
+  [S, F, C, S], 
+  [A, D, E, E] 
+], word = "ABCCED"
+Start at (0,0) → 'A' == word[0]
+DFS → mark (0,0) = '#'
+Explore right (0,1) → 'B' == word[1]
+DFS → mark (0,1) = '#'
+Explore right (0,2) → 'C' == word[2]
+DFS → mark (0,2) = '#'
+Explore down (1,2) → 'C' == word[3]
+DFS → mark (1,2) = '#'
+Explore down (2,2) → 'E' == word[4]
+DFS → mark (2,2) = '#'
+Explore left (2,1) → 'D' == word[5]
+Word found ✔️
+💡 Tip
+Don’t forget to restore board[i][j] after recursion for backtracking.
+
+❌ Dry Run – Word Does Not Exist
+Input:
+txt
+CopyEdit
+board = [ 
+  ['A','B','C','E'],
+  ['S','F','C','S'],
+  ['A','D','E','E']
+], word = "ABCB"
+Observation:
+"A" → (0,0)
+"B" → (0,1)
+"C" → (0,2)
+Can’t go to "B" again (already visited) → ❌ Backtrack
+Try other paths → none work
+🔚 No valid path → Word Not Found ❌
+💻 C++ Code (Clean & Commented)
+cpp
+CopyEdit
+class Solution {
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        int rows = board.size();
+        int cols = board[0].size();
+
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                if (dfs(board, word, i, j, 0))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+private:
+    bool dfs(vector<vector<char>>& board, string& word, int i, int j, int idx) {
+        // Base case: All characters matched
+        if (idx == word.size()) return true;
+
+        // Boundary & character mismatch check
+        if (i < 0 || i >= board.size() ||
+            j < 0 || j >= board[0].size() ||
+            board[i][j] != word[idx]) return false;
+
+        // Save the character and mark visited
+        char temp = board[i][j];
+        board[i][j] = '#';
+
+        // Explore all 4 directions
+        bool found = dfs(board, word, i + 1, j, idx + 1) ||
+                     dfs(board, word, i - 1, j, idx + 1) ||
+                     dfs(board, word, i, j + 1, idx + 1) ||
+                     dfs(board, word, i, j - 1, idx + 1);
+
+        // Backtrack
+        board[i][j] = temp;
+
+        return found;
+    }
+};
