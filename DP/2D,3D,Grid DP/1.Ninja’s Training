@@ -1,0 +1,260 @@
+🥷 Ninja’s Training (DP-7) – Super Detailed Notes
+🔹 Problem Statement
+
+You have N days of training.
+
+Each day you can choose one activity out of 3 possible ones:
+
+0 → Running
+
+1 → Fighting Practice
+
+2 → Learning New Moves
+
+Each activity gives points, given in a matrix points[N][3].
+
+Constraint: Same activity cannot be chosen on two consecutive days.
+
+Goal: Find the maximum points possible after N days.
+
+🔹 Input / Output Example
+points = [
+  [10, 40, 70],
+  [20, 50, 80],
+  [30, 60, 90]
+]
+
+
+👉 Optimal Choice:
+
+Day0 → Activity 2 (70)
+
+Day1 → Activity 1 (50)
+
+Day2 → Activity 2 (90)
+Total = 210
+
+🔹 Why Greedy Fails?
+
+If we always pick the maximum daily points → might miss future higher rewards.
+
+Example:
+
+Day0: [50, 10, 1]
+Day1: [100, 11, 2]
+
+
+Greedy:
+Day0 = 50, Day1 cannot take 100 → forced to take 11 → total = 61.
+
+Optimal:
+Day0 = 10, Day1 = 100 → total = 110 ✅
+
+👉 So, we must explore all valid choices → DP required.
+
+🔹 Step 1: Identify State
+
+We need 2 parameters:
+
+day → current day (0 … N-1)
+
+last → last activity performed (0,1,2; or 3 if none)
+
+Define function:
+
+f(day, last) = maximum points possible up to 'day',
+               given that 'last' was the activity chosen yesterday
+
+🔹 Step 2: State Transition
+
+At each day → try all 3 activities:
+
+f(day, last) = max( points[day][task] + f(day-1, task) )
+               for all task != last
+
+🔹 Step 3: Base Case
+
+At day = 0:
+If last = 3 (no restriction yet) → return max of all 3.
+If last = some activity → return max of the other 2.
+
+🔹 Step 4: Recursive Solution (Brute Force)
+
+Recursively try all choices:
+
+Exponential complexity: O(3^N) (bad for N > 20).
+
+But helps us build intuition.
+
+🔹 Step 5: Add Memoization
+
+We see overlapping subproblems.
+So → add a DP table dp[day][last].
+
+Dimensions = N x 4
+
+Initialize with -1
+
+Before recursion, check dp[day][last]
+
+🔹 Recursive + Memoization Code (Top-Down)
+int f(int day, int last, vector<vector<int>> &points, vector<vector<int>> &dp) {
+    if (dp[day][last] != -1) return dp[day][last];
+
+    if (day == 0) {
+        int maxi = 0;
+        for (int i=0; i<3; i++) {
+            if (i != last) maxi = max(maxi, points[0][i]);
+        }
+        return dp[day][last] = maxi;
+    }
+
+    int maxi = 0;
+    for (int task=0; task<3; task++) {
+        if (task != last) {
+            int activity = points[day][task] + f(day-1, task, points, dp);
+            maxi = max(maxi, activity);
+        }
+    }
+    return dp[day][last] = maxi;
+}
+
+int ninjaTraining(int n, vector<vector<int>> &points) {
+    vector<vector<int>> dp(n, vector<int>(4, -1));
+    return f(n-1, 3, points, dp);
+}
+
+
+✅ Time Complexity: O(N × 4 × 3)
+✅ Space Complexity: O(N × 4) + O(N recursion)
+
+🔹 Step 6: Convert to Tabulation (Bottom-Up)
+
+Build the DP table iteratively.
+
+Base Initialization:
+dp[0][0] = max(points[0][1], points[0][2]);
+dp[0][1] = max(points[0][0], points[0][2]);
+dp[0][2] = max(points[0][0], points[0][1]);
+dp[0][3] = max(points[0][0], points[0][1], points[0][2]);
+
+Transition:
+for day = 1 … N-1:
+  for last = 0 … 3:
+    dp[day][last] = max( points[day][task] + dp[day-1][task] )
+                    for all task != last
+
+🔹 Tabulation Code
+int ninjaTraining(int n, vector<vector<int>>& points) {
+    vector<vector<int>> dp(n, vector<int>(4, 0));
+
+    dp[0][0] = max(points[0][1], points[0][2]);
+    dp[0][1] = max(points[0][0], points[0][2]);
+    dp[0][2] = max(points[0][0], points[0][1]);
+    dp[0][3] = max({points[0][0], points[0][1], points[0][2]});
+
+    for (int day=1; day<n; day++) {
+        for (int last=0; last<4; last++) {
+            dp[day][last] = 0;
+            for (int task=0; task<3; task++) {
+                if (task != last) {
+                    dp[day][last] = max(dp[day][last],
+                                        points[day][task] + dp[day-1][task]);
+                }
+            }
+        }
+    }
+    return dp[n-1][3];
+}
+
+
+✅ Time Complexity: O(N × 4 × 3)
+✅ Space Complexity: O(N × 4)
+
+🔹 Step 7: Space Optimization
+
+Notice:
+
+dp[day][...] only depends on dp[day-1][...].
+
+So → we don’t need full DP table.
+
+Keep only 2 arrays: prev[4] and temp[4].
+
+🔹 Space Optimized Code
+int ninjaTraining(int n, vector<vector<int>>& points) {
+    vector<int> prev(4, 0);
+
+    prev[0] = max(points[0][1], points[0][2]);
+    prev[1] = max(points[0][0], points[0][2]);
+    prev[2] = max(points[0][0], points[0][1]);
+    prev[3] = max({points[0][0], points[0][1], points[0][2]});
+
+    for (int day=1; day<n; day++) {
+        vector<int> temp(4, 0);
+        for (int last=0; last<4; last++) {
+            for (int task=0; task<3; task++) {
+                if (task != last) {
+                    temp[last] = max(temp[last],
+                                     points[day][task] + prev[task]);
+                }
+            }
+        }
+        prev = temp;
+    }
+    return prev[3];
+}
+
+
+✅ Time Complexity: O(N × 4 × 3)
+✅ Space Complexity: O(4) → O(1)
+
+🔹 Dry Run Example
+
+points = [[10,40,70], [20,50,80], [30,60,90]]
+
+Day0 (base):
+prev = [max(40,70)=70, max(10,70)=70, max(10,40)=40, max(10,40,70)=70]
+→ prev = [70,70,40,70]
+
+Day1:
+Compute for each last:
+
+last=0 → max(50+70, 80+40)=130
+
+last=1 → max(20+70, 80+40)=110
+
+last=2 → max(20+70, 50+70)=120
+
+last=3 → max(20+70, 50+70, 80+40)=150
+→ temp = [130,110,120,150]
+
+Day2:
+last=0 → max(60+110, 90+120)=210
+last=1 → max(30+130, 90+120)=210
+last=2 → max(30+130, 60+110)=190
+last=3 → max(30+130, 60+110, 90+120)=210
+→ temp = [210,210,190,210]
+
+Answer = prev[3] = 210 ✅
+
+🔹 Complexity Recap
+Approach	Time	Space
+Recursion	O(3^N)	O(N)
+Memoization	O(N×4×3)	O(N×4 + N stack)
+Tabulation	O(N×4×3)	O(N×4)
+Space Optimized	O(N×4×3)	O(4) ≈ O(1)
+🔹 Similar Problems (Same Pattern)
+
+🎨 Paint House problem (Leetcode 256 / 265)
+
+🏖️ Vacation Problem (AtCoder DP C)
+
+🛠️ Job Scheduling with Constraints
+
+📚 Choose Tasks with Restrictions
+
+⚡ Key Insight:
+This is a “pick tasks with restrictions” DP.
+State is always (day, last_choice) and transitions = “try all except last”.
+Once you spot this → any similar problem reduces to this template.
