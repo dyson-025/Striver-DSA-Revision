@@ -1,0 +1,207 @@
+🟢 Minimum Path Sum in a Triangular Grid (DP – 11)
+link: https://leetcode.com/problems/triangle/
+✅ Mark as Completed
+📌 Score: 73
+
+📖 Problem Statement
+
+We are given a triangular matrix (triangle grid).
+We need to find the minimum path sum from the top element (row 0, col 0) to any element in the last row.
+
+👉 At each cell, we can move in two directions only:
+
+Down (↓) → triangle[i+1][j]
+
+Down-Right (↘) → triangle[i+1][j+1]
+
+🔗 Problem Link
+
+Leetcode – Triangle
+
+This problem is also known as Fixed Starting and Ending Point.
+
+📌 Example
+Input Triangle:
+     1
+    2 3
+   3 6 7
+  8 9 6 10
+
+Possible Paths:
+
+1 → 2 → 3 → 8 = 14
+
+1 → 2 → 3 → 9 = 15
+
+1 → 2 → 6 → 9 = 18
+
+1 → 3 → 6 → 9 = 19
+
+1 → 3 → 7 → 6 = 17
+
+✅ Answer = 14 (minimum path sum)
+
+⚡ Why Greedy Fails?
+
+At every step, choosing the smaller of the two adjacent values does not guarantee a global minimum.
+For example:
+
+Greedy may pick 3 instead of 6, but in the next row, the sum might grow larger.
+Hence, we need Dynamic Programming.
+
+🟢 Step 1: Recursive Approach (Exponential ❌)
+
+We define a function f(i, j) = minimum path sum starting from (i, j) to the last row.
+
+Base Case:
+If i == n-1 (last row) → return triangle[i][j]
+
+Recursive Case:
+From (i, j) we can move:
+
+Down → triangle[i][j] + f(i+1, j)
+
+Diagonal → triangle[i][j] + f(i+1, j+1)
+
+Return: min(down, diagonal)
+
+🟢 Step 2: Memoization (Top-Down DP)
+
+We store results of overlapping subproblems in a dp[i][j] table.
+
+C++ Code:
+#include <bits/stdc++.h>
+using namespace std;
+
+int minimumPathSumUtil(int i, int j, vector<vector<int>>& triangle, int n, vector<vector<int>>& dp) {
+    if (i == n - 1) return triangle[i][j];  // Base case: last row
+    if (dp[i][j] != -1) return dp[i][j];    // Already computed
+
+    int down = triangle[i][j] + minimumPathSumUtil(i + 1, j, triangle, n, dp);
+    int diagonal = triangle[i][j] + minimumPathSumUtil(i + 1, j + 1, triangle, n, dp);
+
+    return dp[i][j] = min(down, diagonal);
+}
+
+int minimumPathSum(vector<vector<int>>& triangle, int n) {
+    vector<vector<int>> dp(n, vector<int>(n, -1));
+    return minimumPathSumUtil(0, 0, triangle, n, dp);
+}
+
+int main() {
+    vector<vector<int>> triangle{{1}, {2, 3}, {3, 6, 7}, {8, 9, 6, 10}};
+    int n = triangle.size();
+    cout << "Minimum Path Sum: " << minimumPathSum(triangle, n);
+}
+
+Output:
+14
+
+⏱ Complexity:
+
+Time: O(N²)
+
+Space: O(N²) (DP table) + O(N) (recursion stack)
+
+🟢 Step 3: Tabulation (Bottom-Up DP)
+
+Instead of recursion, we build from the last row upwards.
+
+Intuition:
+
+Last row values = base case
+
+Each dp[i][j] = triangle[i][j] + min(dp[i+1][j], dp[i+1][j+1])
+
+C++ Code:
+#include <bits/stdc++.h>
+using namespace std;
+
+int minimumPathSum(vector<vector<int>>& triangle, int n) {
+    vector<vector<int>> dp(n, vector<int>(n, 0));
+
+    // Initialize last row
+    for (int j = 0; j < n; j++) dp[n-1][j] = triangle[n-1][j];
+
+    // Bottom-up DP
+    for (int i = n-2; i >= 0; i--) {
+        for (int j = 0; j <= i; j++) {
+            int down = triangle[i][j] + dp[i+1][j];
+            int diagonal = triangle[i][j] + dp[i+1][j+1];
+            dp[i][j] = min(down, diagonal);
+        }
+    }
+    return dp[0][0];
+}
+
+int main() {
+    vector<vector<int>> triangle{{1}, {2, 3}, {3, 6, 7}, {8, 9, 6, 10}};
+    int n = triangle.size();
+    cout << "Minimum Path Sum: " << minimumPathSum(triangle, n);
+}
+
+Output:
+14
+
+⏱ Complexity:
+
+Time: O(N²)
+
+Space: O(N²)
+
+🟢 Step 4: Space Optimization (1D DP)
+
+Notice we only need the next row to calculate the current row.
+So we can optimize space from O(N²) → O(N).
+
+C++ Code:
+#include <bits/stdc++.h>
+using namespace std;
+
+int minimumPathSum(vector<vector<int>>& triangle, int n) {
+    vector<int> front(n, 0), cur(n, 0);
+
+    // Initialize with last row
+    for (int j = 0; j < n; j++) front[j] = triangle[n-1][j];
+
+    // Bottom-up with 1D DP
+    for (int i = n-2; i >= 0; i--) {
+        for (int j = 0; j <= i; j++) {
+            int down = triangle[i][j] + front[j];
+            int diagonal = triangle[i][j] + front[j+1];
+            cur[j] = min(down, diagonal);
+        }
+        front = cur;
+    }
+    return front[0];
+}
+
+int main() {
+    vector<vector<int>> triangle{{1}, {2, 3}, {3, 6, 7}, {8, 9, 6, 10}};
+    int n = triangle.size();
+    cout << "Minimum Path Sum: " << minimumPathSum(triangle, n);
+}
+
+Output:
+14
+
+⏱ Complexity:
+
+Time: O(N²)
+
+Space: O(N)
+
+✅ Final Comparison of Approaches
+Approach	Time Complexity	Space Complexity
+Recursion	O(2^N) ❌	O(N) (stack)
+Memoization	O(N²)	O(N²)
+Tabulation	O(N²)	O(N²)
+Space Optimized	O(N²) ✅	O(N) ✅
+
+🔥 Key Takeaways:
+
+Triangular DP problems follow downward movement recursion.
+
+Best solution: Space Optimized DP.
+
+Useful in interview rounds (Leetcode Hard variations exist too).
