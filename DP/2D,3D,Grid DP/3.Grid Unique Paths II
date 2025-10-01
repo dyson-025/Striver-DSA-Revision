@@ -1,0 +1,215 @@
+🌟 Grid Unique Paths II (DP – 9)
+link: https://leetcode.com/problems/unique-paths-ii/
+✅ Mark as Completed
+Score: 55
+
+🔹 Problem Description
+
+We are given an N x M grid (maze). Some cells may contain obstacles.
+
+A blocked cell is denoted by -1.
+
+A free cell is denoted by 0.
+
+We need to count the total number of unique paths from the top-left cell (0,0) to the bottom-right cell (N-1, M-1).
+
+At each step, we can move:
+
+Down (↓), or
+
+Right (→)
+
+If a cell is blocked, we cannot pass through it.
+
+🔹 Example
+Example 1:
+Grid (3x3):
+0  0  0
+0 -1  0
+0  0  0
+
+
+Possible Paths:
+
+Right → Right → Down → Down
+
+Down → Down → Right → Right
+
+❌ Any path going through (1,1) is blocked.
+
+✅ Answer = 2
+
+🔹 Intuition
+
+This is a direct extension of Grid Unique Paths (DP-8), but here we need to handle obstacles.
+
+👉 At every cell (i, j):
+
+If grid[i][j] == -1 → No path possible through this cell, so return 0.
+
+Otherwise, total paths = paths from up + paths from left.
+
+🔸 Approach 1: Recursion + Memoization
+Steps:
+
+Define a function f(i, j) = number of ways to reach (i, j) from (0, 0).
+
+Base Cases:
+
+If (i,j) is out of bounds → return 0.
+
+If (i,j) is blocked → return 0.
+
+If (i==0 && j==0) → return 1 (we reached start).
+
+Transition:
+
+f(i,j) = f(i-1, j) + f(i, j-1)
+
+Since recursion has overlapping subproblems, we store results in a dp table.
+
+Code (Memoization – C++)
+#include <bits/stdc++.h>
+using namespace std;
+
+int f(int i, int j, vector<vector<int>>& maze, vector<vector<int>>& dp) {
+    if (i >= 0 && j >= 0 && maze[i][j] == -1) return 0; // obstacle
+    if (i == 0 && j == 0) return 1; // reached start
+    if (i < 0 || j < 0) return 0;   // out of bounds
+    
+    if (dp[i][j] != -1) return dp[i][j]; // already solved
+    
+    int up = f(i-1, j, maze, dp);
+    int left = f(i, j-1, maze, dp);
+    
+    return dp[i][j] = up + left;
+}
+
+int mazeObstacles(int n, int m, vector<vector<int>>& maze) {
+    vector<vector<int>> dp(n, vector<int>(m, -1));
+    return f(n-1, m-1, maze, dp);
+}
+
+int main() {
+    vector<vector<int>> maze{
+        {0, 0, 0},
+        {0, -1, 0},
+        {0, 0, 0}
+    };
+    cout << mazeObstacles(3, 3, maze) << endl; // Output: 2
+}
+
+Complexity
+
+Time Complexity: O(N*M) → Each cell solved once.
+
+Space Complexity: O(N*M) + O(N+M) (dp + recursion stack).
+
+🔸 Approach 2: Tabulation (Bottom-Up DP)
+Steps:
+
+Create a DP table dp[n][m].
+
+Base Case: dp[0][0] = 1 if not blocked.
+
+For each cell (i,j):
+
+If blocked → dp[i][j] = 0.
+
+Else → dp[i][j] = dp[i-1][j] + dp[i][j-1] (if inside grid).
+
+Code (Tabulation – C++)
+#include <bits/stdc++.h>
+using namespace std;
+
+int mazeObstacles(int n, int m, vector<vector<int>>& maze) {
+    vector<vector<int>> dp(n, vector<int>(m, 0));
+    
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (maze[i][j] == -1) {
+                dp[i][j] = 0; // obstacle
+                continue;
+            }
+            if (i == 0 && j == 0) {
+                dp[i][j] = 1; // start
+                continue;
+            }
+            int up = 0, left = 0;
+            if (i > 0) up = dp[i-1][j];
+            if (j > 0) left = dp[i][j-1];
+            dp[i][j] = up + left;
+        }
+    }
+    return dp[n-1][m-1];
+}
+
+int main() {
+    vector<vector<int>> maze{
+        {0, 0, 0},
+        {0, -1, 0},
+        {0, 0, 0}
+    };
+    cout << mazeObstacles(3, 3, maze) << endl; // Output: 2
+}
+
+Complexity
+
+Time Complexity: O(N*M)
+
+Space Complexity: O(N*M)
+
+🔸 Approach 3: Space Optimization
+
+We only need previous row + current row, so we reduce space.
+
+Code (Space Optimized – C++)
+#include <bits/stdc++.h>
+using namespace std;
+
+int mazeObstacles(int n, int m, vector<vector<int>>& maze) {
+    vector<int> prev(m, 0);
+    
+    for (int i = 0; i < n; i++) {
+        vector<int> curr(m, 0);
+        for (int j = 0; j < m; j++) {
+            if (maze[i][j] == -1) {
+                curr[j] = 0; // obstacle
+                continue;
+            }
+            if (i == 0 && j == 0) {
+                curr[j] = 1; // start
+                continue;
+            }
+            int up = 0, left = 0;
+            if (i > 0) up = prev[j];
+            if (j > 0) left = curr[j-1];
+            curr[j] = up + left;
+        }
+        prev = curr;
+    }
+    return prev[m-1];
+}
+
+int main() {
+    vector<vector<int>> maze{
+        {0, 0, 0},
+        {0, -1, 0},
+        {0, 0, 0}
+    };
+    cout << mazeObstacles(3, 3, maze) << endl; // Output: 2
+}
+
+Complexity
+
+Time Complexity: O(N*M)
+
+Space Complexity: O(M)
+
+🔹 Final Notes
+
+This problem is almost same as Grid Unique Paths (DP-8) but with one extra condition → obstacles check.
+
+Always check if (maze[i][j] == -1) and set dp[i][j] = 0.
+
+Space optimized version is best for interviews.
