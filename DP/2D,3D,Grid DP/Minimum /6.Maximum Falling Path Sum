@@ -1,0 +1,145 @@
+🧩 Minimum / Maximum Falling Path Sum (DP – 12)
+link: https://leetcode.com/problems/minimum-falling-path-sum/
+🔹 Problem Statement
+
+We are given an N x M matrix.
+We need to find the maximum (or minimum) path sum starting from any cell in the first row and ending at any cell in the last row.
+
+At each cell (i, j) you can move to:
+
+Down → (i+1, j)
+
+Down-left → (i+1, j-1)
+
+Down-right → (i+1, j+1)
+
+🔹 Why Greedy Fails?
+
+If we always choose the max (or min) local move, it can block better global paths.
+
+Example:
+
+1  100
+2    1
+
+
+Greedy would pick 100 → 1 = 101,
+but optimal is 1 → 2 = 3.
+Hence, we must try all paths → DP.
+
+🔑 DP State Definition
+
+Let
+f(i, j) = max/min falling path sum to reach cell (i, j) starting from row 0.
+
+🛠️ Approaches
+1️⃣ Recursive Approach (Top-Down)
+
+From (i, j) you can move up, up-left, up-right (reverse thinking).
+
+Base Case: i == 0 → return matrix[0][j].
+
+Out of bounds (j < 0 || j >= m) → return -1e9 (for max) or +1e9 (for min).
+
+int getMaxUtil(int i, int j, int m, vector<vector<int>> &matrix, vector<vector<int>> &dp) {
+    if (j < 0 || j >= m) return -1e9;   // invalid
+    if (i == 0) return matrix[0][j];    // base row
+
+    if (dp[i][j] != -1) return dp[i][j];
+
+    int up = matrix[i][j] + getMaxUtil(i-1, j, m, matrix, dp);
+    int leftDiag = matrix[i][j] + getMaxUtil(i-1, j-1, m, matrix, dp);
+    int rightDiag = matrix[i][j] + getMaxUtil(i-1, j+1, m, matrix, dp);
+
+    return dp[i][j] = max({up, leftDiag, rightDiag});
+}
+
+int getMaxPathSum(vector<vector<int>> &matrix) {
+    int n = matrix.size(), m = matrix[0].size();
+    vector<vector<int>> dp(n, vector<int>(m, -1));
+    int maxi = INT_MIN;
+    for (int j=0; j<m; j++) {
+        maxi = max(maxi, getMaxUtil(n-1, j, m, matrix, dp));
+    }
+    return maxi;
+}
+
+
+✅ Time Complexity: O(NM) (since each state (i,j) computed once)
+✅ Space Complexity: O(NM) + O(N) recursion
+
+2️⃣ Tabulation (Bottom-Up)
+
+Build dp[i][j] using previous row.
+
+Transition:
+
+dp[i][j] = matrix[i][j] + max(dp[i-1][j], dp[i-1][j-1], dp[i-1][j+1])
+
+
+Initialize first row as base.
+
+int getMaxPathSum(vector<vector<int>>& matrix) {
+    int n = matrix.size(), m = matrix[0].size();
+    vector<vector<int>> dp(n, vector<int>(m, 0));
+
+    for (int j=0; j<m; j++) dp[0][j] = matrix[0][j];
+
+    for (int i=1; i<n; i++) {
+        for (int j=0; j<m; j++) {
+            int up = matrix[i][j] + dp[i-1][j];
+            int leftDiag = matrix[i][j] + (j>0 ? dp[i-1][j-1] : -1e9);
+            int rightDiag = matrix[i][j] + (j<m-1 ? dp[i-1][j+1] : -1e9);
+            dp[i][j] = max({up, leftDiag, rightDiag});
+        }
+    }
+
+    return *max_element(dp[n-1].begin(), dp[n-1].end());
+}
+
+
+✅ Time Complexity: O(NM)
+✅ Space Complexity: O(NM)
+
+3️⃣ Space Optimized
+
+Since we only need the previous row:
+
+int getMaxPathSum(vector<vector<int>>& matrix) {
+    int n = matrix.size(), m = matrix[0].size();
+    vector<int> prev(matrix[0].begin(), matrix[0].end());
+
+    for (int i=1; i<n; i++) {
+        vector<int> cur(m, 0);
+        for (int j=0; j<m; j++) {
+            int up = matrix[i][j] + prev[j];
+            int leftDiag = matrix[i][j] + (j>0 ? prev[j-1] : -1e9);
+            int rightDiag = matrix[i][j] + (j<m-1 ? prev[j+1] : -1e9);
+            cur[j] = max({up, leftDiag, rightDiag});
+        }
+        prev = cur;
+    }
+    return *max_element(prev.begin(), prev.end());
+}
+
+
+✅ Time Complexity: O(N*M)
+✅ Space Complexity: O(M)
+
+🆚 Minimum vs Maximum Path Sum
+
+Maximum Path Sum: use max() in transitions, invalid paths = -1e9.
+
+Minimum Path Sum: use min() in transitions, invalid paths = +1e9.
+
+Same code, just change operators.
+
+🔑 Key Takeaways
+
+State: (i, j) → max/min path till cell.
+
+Transition: move down, down-left, down-right.
+
+Base Case: first row = matrix itself.
+
+Optimization: from recursion → memoization → tabulation → space optimized.
