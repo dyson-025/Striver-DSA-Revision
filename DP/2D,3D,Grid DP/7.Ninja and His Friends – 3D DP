@@ -1,0 +1,263 @@
+Ninja and His Friends – 3D DP Revision Notes
+link: https://leetcode.com/problems/cherry-pickup-ii/description/
+Problem Statement (Simple Version)
+
+You are given a grid grid[N][M] where grid[i][j] = number of chocolates in cell (i,j).
+
+Alice starts at (0,0) (top-left), Bob starts at (0, M-1) (top-right).
+
+Both can move only downwards in 3 directions:
+
+↓ Straight down
+
+↘ Diagonal right
+
+↙ Diagonal left
+
+Goal: Maximize the total chocolates collected by Alice and Bob.
+
+Important Rule: If Alice and Bob land on the same cell, count chocolates only once.
+
+Step 1: Understanding the State
+
+Both move row by row, so their row index is always the same → we need only one row index i.
+
+Columns are different → track Alice and Bob separately:
+
+j1 = Alice column
+
+j2 = Bob column
+
+DP state: (i, j1, j2)
+
+Represents maximum chocolates collected from row i to the last row if Alice is at column j1 and Bob is at column j2.
+
+3D DP array: dp[i][j1][j2]
+
+Step 2: Base Cases
+
+Out-of-bounds (invalid moves):
+
+if(j1 < 0 || j1 >= M || j2 < 0 || j2 >= M) return -1e9;
+
+
+Last row (i == N-1):
+
+if(j1 == j2) return grid[i][j1]; // Both on same cell
+else return grid[i][j1] + grid[i][j2]; // Different cells
+
+Step 3: Recursive Relation
+
+At row i, both Alice and Bob can move in 3 directions each → 9 combinations.
+
+Recursive relation:
+
+int maxi = INT_MIN;
+for(int di = -1; di <= 1; di++) {       // Alice move
+    for(int dj = -1; dj <= 1; dj++) {   // Bob move
+        int value = (j1==j2)? grid[i][j1] : grid[i][j1] + grid[i][j2];
+        value += f(i+1, j1+di, j2+dj); // Add max chocolates from next row
+        maxi = max(maxi, value);       // Take maximum of all 9 moves
+    }
+}
+return maxi;
+
+Step 4: Memoization (Top-Down DP)
+
+Without memoization → exponential recursion → very slow.
+
+Many (i,j1,j2) states repeat → store results in a 3D DP array:
+
+vector<vector<vector<int>>> dp(N, vector<vector<int>>(M, vector<int>(M, -1)));
+
+
+Before computing, check:
+
+if(dp[i][j1][j2] != -1) return dp[i][j1][j2];
+
+
+Save result after computation:
+
+dp[i][j1][j2] = maxi;
+
+
+Complexity:
+
+Time: O(NMM*9)
+
+Space: O(NMM) + recursion stack O(N)
+
+Step 5: Tabulation (Bottom-Up DP)
+
+Bottom-up approach eliminates recursion.
+
+Steps:
+
+Initialize last row (i = N-1):
+
+for(int j1=0;j1<M;j1++)
+    for(int j2=0;j2<M;j2++)
+        dp[N-1][j1][j2] = (j1==j2)? grid[N-1][j1] : grid[N-1][j1] + grid[N-1][j2];
+
+
+Traverse rows from N-2 → 0:
+
+for(int i=N-2;i>=0;i--){
+    for(int j1=0;j1<M;j1++){
+        for(int j2=0;j2<M;j2++){
+            int maxi = INT_MIN;
+            for(int di=-1;di<=1;di++){
+                for(int dj=-1;dj<=1;dj++){
+                    int value = (j1==j2)? grid[i][j1] : grid[i][j1] + grid[i][j2];
+                    if(j1+di>=0 && j1+di<M && j2+dj>=0 && j2+dj<M)
+                        value += dp[i+1][j1+di][j2+dj];
+                    else
+                        value += -1e9;
+                    maxi = max(maxi,value);
+                }
+            }
+            dp[i][j1][j2] = maxi;
+        }
+    }
+}
+
+
+Answer: dp[0][0][M-1]
+
+Complexity:
+
+Time: O(NMM*9)
+
+Space: O(NMM)
+
+Step 6: Space Optimization
+
+Observation: To compute dp[i][j1][j2], we only need the next row dp[i+1][][].
+
+Use two 2D arrays:
+
+front[j1][j2] → stores row i+1
+
+cur[j1][j2] → stores row i
+
+After computing current row: front = cur
+
+Answer: front[0][M-1]
+
+Complexity:
+
+Time: O(NMM*9)
+
+Space: O(M*M)
+
+Step 7: Detailed Example
+
+Grid (3x4):
+
+2 3 1 2
+3 4 2 2
+5 6 3 5
+
+
+Alice (0,0)
+
+Bob (0,3)
+
+Last row (i=2) DP values:
+
+dp[2][0][0] = 5
+dp[2][0][1] = 2+6 = 8
+dp[2][0][2] = 2+3 = 5
+dp[2][0][3] = 2+5 = 7
+...
+
+
+Second row (i=1)
+
+Alice (1,0) Bob (1,3)
+
+9 possible moves → check dp[2][new_j1][new_j2], add current chocolates → take max.
+
+Repeat until row 0 → final answer = 21.
+
+Step 8: Fully Commented C++ Code (Space Optimized)
+#include <bits/stdc++.h>
+using namespace std;
+
+// Function to calculate maximum chocolates
+int maximumChocolates(int n, int m, vector<vector<int>> &grid) {
+    // front: DP of next row, cur: DP of current row
+    vector<vector<int>> front(m, vector<int>(m, 0)), cur(m, vector<int>(m, 0));
+
+    // Initialize last row
+    for(int j1 = 0; j1 < m; j1++){
+        for(int j2 = 0; j2 < m; j2++){
+            if(j1 == j2) 
+                front[j1][j2] = grid[n-1][j1]; // Same cell
+            else 
+                front[j1][j2] = grid[n-1][j1] + grid[n-1][j2];
+        }
+    }
+
+    // Traverse rows from second-last to first
+    for(int i = n-2; i >= 0; i--){
+        for(int j1 = 0; j1 < m; j1++){
+            for(int j2 = 0; j2 < m; j2++){
+                int maxi = INT_MIN;
+
+                // Try all 9 possible moves
+                for(int di = -1; di <= 1; di++){
+                    for(int dj = -1; dj <= 1; dj++){
+                        int value = (j1 == j2) ? grid[i][j1] : grid[i][j1] + grid[i][j2];
+
+                        // Check bounds
+                        if(j1+di >=0 && j1+di < m && j2+dj >=0 && j2+dj < m)
+                            value += front[j1+di][j2+dj];
+                        else
+                            value += -1e9;
+
+                        maxi = max(maxi, value);
+                    }
+                }
+                cur[j1][j2] = maxi; // Store current row
+            }
+        }
+        front = cur; // Move current row to front for next iteration
+    }
+
+    return front[0][m-1]; // Answer: max chocolates starting from (0,0) & (0,M-1)
+}
+
+int main() {
+    vector<vector<int>> grid = {
+        {2, 3, 1, 2},
+        {3, 4, 2, 2},
+        {5, 6, 3, 5}
+    };
+    int n = grid.size();
+    int m = grid[0].size();
+
+    cout << "Maximum Chocolates: " << maximumChocolates(n, m, grid) << endl;
+    return 0;
+}
+
+
+Output:
+
+Maximum Chocolates: 21
+
+Step 9: Key Takeaways
+
+State = (i, j1, j2) → classic 3D DP
+
+9 moves per cell → two nested loops
+
+Base Cases: last row & out-of-bounds
+
+Count chocolate once if Alice==Bob
+
+Memoization → Tabulation → Space Optimization
+
+Time Complexity: O(NMM*9)
+
+Space Complexity: O(M*M) (optimized)
