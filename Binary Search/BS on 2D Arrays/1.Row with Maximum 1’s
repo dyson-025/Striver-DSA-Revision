@@ -1,0 +1,98 @@
+📒 Revision Notes – Row with Maximum 1’s
+link: https://www.geeksforgeeks.org/problems/row-with-max-1s0023/1
+🔹 Problem:
+
+You are given an n x m binary matrix (only 0s and 1s).
+
+Each row is sorted in ascending order.
+
+Find the index of the row with the maximum number of 1’s.
+
+If no 1 exists → return -1.
+
+If tie → return row with smaller index.
+
+🔹 Brute Force Approach
+
+Idea: Traverse every row → count 1’s → track max.
+
+Steps:
+
+For each row → count 1’s with a loop.
+
+Compare with cnt_max, update if larger.
+
+Return index of row with max 1’s.
+
+Time Complexity: O(n * m)
+
+Space Complexity: O(1)
+
+✔️ Easy to implement but slow for large inputs.
+
+🔹 Optimized Approach (Binary Search)
+
+Idea: Since rows are sorted, find first occurrence of 1 using binary search.
+
+Formula:
+number_of_ones = m - first_occurrence_index
+
+Use lowerBound(1) to find first 1 in each row.
+
+Compare counts and update index.
+
+Steps:
+
+Initialize cnt_max = 0, index = -1.
+
+For each row:
+
+Use lowerBound to get first 1.
+
+Compute no. of 1’s = m - position.
+
+If greater than cnt_max, update both.
+
+Return index.
+
+Time Complexity: O(n * log m)
+
+Space Complexity: O(1)
+
+✔️ Much faster when m is large.
+
+🔹 Even More Optimized (Greedy – Staircase Traversal)
+
+Idea: Start from top-right corner and move smartly.
+
+If you see 1 → move left (to find earlier 1).
+
+If you see 0 → move down.
+
+Keep track of row index whenever you move left.
+
+Time Complexity: O(n + m)
+
+Space Complexity: O(1)
+
+👉 Best solution for very large inputs.
+
+🔹 Edge Cases
+
+All 0’s → return -1.
+
+Multiple rows with same max 1’s → return smallest index.
+
+Single row/column matrix.
+
+🔹 Quick Comparison
+Approach	Time	Space	Notes
+Brute Force	O(n*m)	O(1)	Simple but slow
+Binary Search	O(n*log m)	O(1)	Uses row sorting
+Staircase (Optimal)	O(n+m)	O(1)	Best choice
+
+✅ Key takeaway:
+
+Use binary search if row size is big.
+
+Use staircase method for best performance.
