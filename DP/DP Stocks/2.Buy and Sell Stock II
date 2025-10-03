@@ -1,0 +1,178 @@
+📘 Revision Notes: Buy and Sell Stock II (DP-36)
+link: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/
+🔹 Problem Statement
+
+Given an array Arr[] of size n, where Arr[i] = stock price on day i.
+
+You can buy and sell any number of times.
+
+Rule:
+
+Must buy before selling.
+
+After selling, you can buy again.
+
+You can’t hold more than one stock at a time.
+
+🔹 Intuition
+
+On each day, you either:
+
+Do nothing (skip).
+
+Buy if you don’t own stock.
+
+Sell if you already own stock.
+
+This creates a state machine with 2 states:
+
+buy = 0 → You don’t hold stock, you can buy.
+
+buy = 1 → You hold stock, you can sell.
+
+So the problem reduces to:
+👉 At each day (ind) and state (buy/sell), decide the best option to maximize profit.
+
+🔹 Recurrence Relation
+
+Let f(ind, buy) = maximum profit from day ind onwards if buy is the current state.
+
+Case 1: buy == 0 (we don’t hold stock → can buy)
+
+Option 1: Skip → 0 + f(ind+1, 0)
+
+Option 2: Buy → -Arr[ind] + f(ind+1, 1)
+Take max of both.
+
+Case 2: buy == 1 (we hold stock → can sell)
+
+Option 1: Skip → 0 + f(ind+1, 1)
+
+Option 2: Sell → +Arr[ind] + f(ind+1, 0)
+Take max of both.
+
+Base Case
+
+If ind == n → No more days → return 0.
+
+🔹 Approaches
+1️⃣ Recursive + Memoization (Top-Down DP)
+#include <bits/stdc++.h>
+using namespace std;
+
+long getAns(long *Arr, int ind, int buy, int n, vector<vector<long>> &dp) {
+    if (ind == n) return 0; // Base case
+
+    if (dp[ind][buy] != -1) return dp[ind][buy];
+
+    long profit = 0;
+    if (buy == 0) {
+        // Either skip or buy
+        profit = max(0 + getAns(Arr, ind+1, 0, n, dp),
+                     -Arr[ind] + getAns(Arr, ind+1, 1, n, dp));
+    } else {
+        // Either skip or sell
+        profit = max(0 + getAns(Arr, ind+1, 1, n, dp),
+                     Arr[ind] + getAns(Arr, ind+1, 0, n, dp));
+    }
+    return dp[ind][buy] = profit;
+}
+
+long getMaximumProfit(long *Arr, int n) {
+    vector<vector<long>> dp(n, vector<long>(2, -1));
+    return getAns(Arr, 0, 0, n, dp);
+}
+
+int main() {
+    int n = 6;
+    long Arr[n] = {7,1,5,3,6,4};
+    cout << "Max Profit = " << getMaximumProfit(Arr, n);
+}
+
+
+✅ Output: Max Profit = 7
+(Buy at 1, sell at 5; buy at 3, sell at 6 → 4 + 3 = 7)
+
+2️⃣ Tabulation (Bottom-Up DP)
+long getMaximumProfit(long *Arr, int n) {
+    vector<vector<long>> dp(n+1, vector<long>(2, 0));
+
+    for (int ind = n-1; ind >= 0; ind--) {
+        for (int buy = 0; buy <= 1; buy++) {
+            if (buy == 0) {
+                dp[ind][buy] = max(0 + dp[ind+1][0],
+                                   -Arr[ind] + dp[ind+1][1]);
+            } else {
+                dp[ind][buy] = max(0 + dp[ind+1][1],
+                                   Arr[ind] + dp[ind+1][0]);
+            }
+        }
+    }
+    return dp[0][0];
+}
+
+3️⃣ Space Optimization
+
+Observation: dp[ind][buy] only depends on dp[ind+1][*].
+So we can just use two arrays (ahead and cur) of size 2.
+
+long getMaximumProfit(long *Arr, int n) {
+    vector<long> ahead(2, 0), cur(2, 0);
+
+    for (int ind = n-1; ind >= 0; ind--) {
+        for (int buy = 0; buy <= 1; buy++) {
+            if (buy == 0) {
+                cur[buy] = max(0 + ahead[0], -Arr[ind] + ahead[1]);
+            } else {
+                cur[buy] = max(0 + ahead[1], Arr[ind] + ahead[0]);
+            }
+        }
+        ahead = cur;
+    }
+    return cur[0];
+}
+
+🔹 Complexity Analysis
+
+Time Complexity: O(N × 2) = O(N)
+
+Space Complexity:
+
+Memoization → O(N × 2) + O(N) recursion stack
+
+Tabulation → O(N × 2)
+
+Space Optimized → O(2) ≈ O(1)
+
+🔹 Greedy Shortcut (for Stock II only)
+
+If multiple transactions are allowed, the max profit is just the sum of all increasing pairs.
+
+i.e., whenever price[i] > price[i-1], add (price[i] - price[i-1]).
+
+Example: [7,1,5,3,6,4]
+Profit = (5-1) + (6-3) = 4 + 3 = 7.
+
+This works because:
+
+Buying at each valley and selling at each peak is equivalent to collecting all upward slopes.
+
+👉 Greedy gives O(N), O(1) solution.
+
+🔹 Key Takeaways
+
+Stock II generalizes Stock I: multiple transactions allowed.
+
+DP State = (day, buy/sell).
+
+Can be solved via recursion + memoization, tabulation, or greedy.
+
+Greedy shortcut works only for unlimited transactions, no cooldown/fee.
+
+This problem is the foundation for:
+
+Stock with cooldown
+
+Stock with transaction fee
+
+Stock with at most k transactions
