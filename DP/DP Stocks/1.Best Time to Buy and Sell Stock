@@ -1,4 +1,5 @@
 📘 Revision Notes: Best Time to Buy and Sell Stock (DP-35)
+ link: https://leetcode.com/problems/best-time-to-buy-and-sell-stock/
 🔹 Problem Statement
 
 Given an array Arr[] of size n where Arr[i] is the stock price on day i.
