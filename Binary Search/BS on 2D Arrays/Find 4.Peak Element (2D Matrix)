@@ -1,0 +1,130 @@
+Problem Statement
+link: https://leetcode.com/problems/find-a-peak-element-ii/
+Given an n x m matrix mat where no two adjacent cells are equal, find any peak element.
+
+A peak element is strictly greater than all its adjacent neighbors (top, bottom, left, right).
+
+Assume the matrix is surrounded by an outer perimeter of -1.
+
+Example:
+
+Input: mat = [[5, 10, 8],
+              [4, 25, 7],
+              [3, 9, 6]]
+Output: [1, 1]   // 25 is a peak
+
+Approach: Binary Search on Columns
+Intuition
+
+Similar to 1D peak finding, where you check the middle element and compare with neighbors to decide the search direction.
+
+In 2D:
+
+Pick a middle column.
+
+Find the row with the maximum element in this column.
+
+Compare this element with its left and right neighbors:
+
+If it is greater than both → peak found.
+
+If the left neighbor is larger → search left columns.
+
+If the right neighbor is larger → search right columns.
+
+Why it works
+
+By always moving towards a neighbor larger than the current max, you are guaranteed to reach a peak (because boundaries are effectively -1 and no two adjacent cells are equal).
+
+Algorithm Steps
+
+Initialize low = 0 and high = m - 1 (column range).
+
+While low <= high:
+
+mid = (low + high) / 2
+
+Find row index with the maximum element in column mid.
+
+Let left = element to the left (or INT_MIN if out of bounds)
+Let right = element to the right (or INT_MIN if out of bounds)
+
+Compare arr[row][mid] with left and right:
+
+arr[row][mid] > left && arr[row][mid] > right → return {row, mid}
+
+left > arr[row][mid] → high = mid - 1
+
+else → low = mid + 1
+
+If no peak found → return {-1, -1} (theoretically impossible here)
+
+C++ Code
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    // Find row with max element in a given column
+    int maxElement(vector<vector<int>>& arr, int col) {
+        int n = arr.size();
+        int max_val = INT_MIN, index = -1;
+        for (int i = 0; i < n; i++) {
+            if (arr[i][col] > max_val) {
+                max_val = arr[i][col];
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    vector<int> findPeakGrid(vector<vector<int>>& arr) {
+        int n = arr.size();
+        int m = arr[0].size();
+        int low = 0, high = m - 1;
+
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            int row = maxElement(arr, mid);
+
+            int left = mid - 1 >= 0 ? arr[row][mid - 1] : INT_MIN;
+            int right = mid + 1 < m ? arr[row][mid + 1] : INT_MIN;
+
+            if (arr[row][mid] > left && arr[row][mid] > right)
+                return {row, mid};
+            else if (left > arr[row][mid])
+                high = mid - 1;
+            else
+                low = mid + 1;
+        }
+        return {-1, -1};
+    }
+};
+
+int main() {
+    vector<vector<int>> mat = {
+        {4, 2, 5, 1, 4, 5},
+        {2, 9, 3, 2, 3, 2},
+        {1, 7, 6, 0, 1, 3},
+        {3, 6, 2, 3, 7, 2}
+    };
+
+    Solution sol;
+    vector<int> peak = sol.findPeakGrid(mat);
+    cout << "Peak element at: [" << peak[0] << ", " << peak[1] << "]\n";
+
+    return 0;
+}
+
+Complexity Analysis
+Metric	Complexity
+Time	O(N * logM) → binary search on columns, linear scan for max in column
+Space	O(1) → constant extra space
+
+✅ Key Takeaways
+
+This method reduces the search from O(N*M) (brute force) to O(N*logM).
+
+Works because a peak always exists in a 2D array if adjacent elements are unequal.
+
+Can be adapted to search rows instead of columns.
