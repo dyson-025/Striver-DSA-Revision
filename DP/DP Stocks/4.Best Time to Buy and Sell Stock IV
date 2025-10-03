@@ -1,0 +1,208 @@
+🔑 Problem Restatement
+link: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/
+You are given prices over n days.
+
+You can perform at most K transactions (1 transaction = 1 buy + 1 sell).
+
+You can’t sell without buying, and you can’t buy again before selling.
+
+Goal: Maximize profit.
+
+✅ Core Idea
+
+Every day you have 2 choices:
+
+Do nothing → move to next day.
+
+Buy or Sell (depending on state).
+
+State depends on:
+
+ind → current day.
+
+buy → 0 if we can buy, 1 if we must sell.
+
+cap → how many transactions are still available.
+
+🧩 Recurrence Relation
+f(ind, buy, cap):
+
+if ind == n or cap == 0 → return 0
+
+if buy == 0:
+    profit = max(
+        f(ind+1, 0, cap),              # skip
+        -prices[ind] + f(ind+1, 1, cap) # buy
+    )
+
+if buy == 1:
+    profit = max(
+        f(ind+1, 1, cap),               # skip
+        prices[ind] + f(ind+1, 0, cap-1) # sell
+    )
+
+
+Answer = f(0, 0, K)
+
+📝 Memoization (Top-Down)
+int getAns(vector<int>& prices, int n, int ind, int buy, int cap, vector<vector<vector<int>>>& dp) {
+    if (ind == n || cap == 0) return 0;
+    if (dp[ind][buy][cap] != -1) return dp[ind][buy][cap];
+
+    int profit = 0;
+    if (buy == 0) { 
+        profit = max(getAns(prices, n, ind+1, 0, cap, dp),
+                     -prices[ind] + getAns(prices, n, ind+1, 1, cap, dp));
+    } else {
+        profit = max(getAns(prices, n, ind+1, 1, cap, dp),
+                     prices[ind] + getAns(prices, n, ind+1, 0, cap-1, dp));
+    }
+    return dp[ind][buy][cap] = profit;
+}
+
+int maxProfit(vector<int>& prices, int K) {
+    int n = prices.size();
+    vector<vector<vector<int>>> dp(n, vector<vector<int>>(2, vector<int>(K+1, -1)));
+    return getAns(prices, n, 0, 0, K, dp);
+}
+
+📝 Tabulation (Bottom-Up)
+int maxProfit(vector<int>& prices, int K) {
+    int n = prices.size();
+    vector<vector<vector<int>>> dp(n+1, vector<vector<int>>(2, vector<int>(K+1, 0)));
+
+    for (int ind = n-1; ind >= 0; ind--) {
+        for (int buy = 0; buy <= 1; buy++) {
+            for (int cap = 1; cap <= K; cap++) {
+                if (buy == 0) {
+                    dp[ind][buy][cap] = max(dp[ind+1][0][cap], 
+                                            -prices[ind] + dp[ind+1][1][cap]);
+                } else {
+                    dp[ind][buy][cap] = max(dp[ind+1][1][cap],
+                                            prices[ind] + dp[ind+1][0][cap-1]);
+                }
+            }
+        }
+    }
+    return dp[0][0][K];
+}
+
+⚡ Space Optimization
+
+We only need ahead (day ind+1) and cur (day ind).
+
+int maxProfit(vector<int>& prices, int K) {
+    int n = prices.size();
+    vector<vector<int>> ahead(2, vector<int>(K+1, 0)), cur(2, vector<int>(K+1, 0));
+
+    for (int ind = n-1; ind >= 0; ind--) {
+        for (int buy = 0; buy <= 1; buy++) {
+            for (int cap = 1; cap <= K; cap++) {
+                if (buy == 0)
+                    cur[buy][cap] = max(ahead[0][cap], -prices[ind] + ahead[1][cap]);
+                else
+                    cur[buy][cap] = max(ahead[1][cap], prices[ind] + ahead[0][cap-1]);
+            }
+        }
+        ahead = cur;
+    }
+    return ahead[0][K];
+}
+
+📊 Complexity
+
+Time: O(N * 2 * K)
+
+Space:
+
+Memo: O(N * 2 * K) + O(N) stack
+
+Tabulation: O(N * 2 * K)
+
+Space Optimized: O(2 * K) → best
+
+👉 This is the most general stock problem (with transaction cap).
+
+If K = 1 → it reduces to Buy and Sell Stock II (one transaction).
+
+If K = 2 → it reduces to Buy and Sell Stock III.
+
+If K ≥ n/2 → it becomes Buy and Sell Stock II (infinite transactions). 
+
+2️⃣ Transaction Number Concept
+
+Instead of (buy, cap), we directly use a transaction number j:
+
+Each transaction consists of 2 steps:
+
+Even j → Buy action allowed
+
+Odd j → Sell action allowed
+
+Max transaction steps = 2*K (buy+sell pairs).
+
+Recurrence:
+f(i, j): maximum profit from day i onwards if we are at transaction step j
+- If j is even → option to BUY
+- If j is odd  → option to SELL
+
+
+So:
+
+If j % 2 == 0 (buy step):
+
+profit = max(-prices[i] + f(i+1, j+1), f(i+1, j))
+
+
+If j % 2 == 1 (sell step):
+
+profit = max(prices[i] + f(i+1, j+1), f(i+1, j))
+
+Code (Space Optimized)
+class Solution {
+public:
+    int maxProfit(int k, vector<int>& prices) {
+        vector<int> after(2*k+1, 0), curr(2*k+1, 0);
+        
+        for (int i = prices.size()-1; i >= 0; i--) {
+            for (int j = 0; j < 2*k; j++) {
+                if (j % 2 == 0) { // Buy step
+                    curr[j] = max(-prices[i] + after[j+1], after[j]);
+                } else { // Sell step
+                    curr[j] = max(prices[i] + after[j+1], after[j]);
+                }
+            }
+            after = curr;
+        }
+        return after[0]; // starting with 0th transaction step
+    }
+};
+
+🔹 Complexity
+
+Time: O(N * 2K)
+
+Space: O(2K)
+
+🔹 Key Insights
+
+This method removes the explicit "cap" variable by encoding it in the transaction number.
+
+Transaction number j directly represents how many buy/sell actions have been done.
+
+When j == 2K, no more transactions possible.
+
+🔥 Quick Comparison
+Approach	State	Complexity
+Buy/Cap DP	(ind, buy, cap)	O(N * 2 * K)
+Transaction Number	(ind, j)	O(N * 2K)
+
+Both are equivalent, but transaction number version is often cleaner & easier to implement.
+
+👉 This now connects all 3 formulations of Stock IV:
+
+(ind, buy, cap)
+
+(ind, buy, transactions done)
+
+(ind, transaction number j)
