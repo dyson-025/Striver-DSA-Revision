@@ -1,0 +1,163 @@
+📘 Buy and Sell Stocks with Cooldown (DP-39)
+ link: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/
+🔹 Problem
+
+We are given an array Arr[] of length n (prices of a stock over n days).
+
+Rules:
+
+We can buy/sell multiple times.
+
+To sell, we must have bought before.
+
+After selling, we must cooldown for 1 day → i.e., cannot buy on the next day.
+
+Goal: maximize profit.
+
+🔹 Recursive Intuition
+
+At every index ind, we have two states:
+
+buy == 0: We can buy.
+
+buy == 1: We can sell.
+
+Case 1: buy == 0 (buy allowed)
+
+Skip → f(ind+1, 0)
+
+Buy → -Arr[ind] + f(ind+1, 1)
+
+Case 2: buy == 1 (sell allowed)
+
+Skip → f(ind+1, 1)
+
+Sell → +Arr[ind] + f(ind+2, 0) (cooldown kicks in → skip next day)
+
+Base Case:
+
+If ind >= n → no more days → return 0.
+
+🔹 Memoization Code
+int getAns(vector<int> &Arr, int ind, int buy, int n, vector<vector<int>> &dp) {
+    if (ind >= n) return 0;
+
+    if (dp[ind][buy] != -1) return dp[ind][buy];
+
+    int profit = 0;
+    if (buy == 0) {
+        profit = max(0 + getAns(Arr, ind+1, 0, n, dp), 
+                     -Arr[ind] + getAns(Arr, ind+1, 1, n, dp));
+    } else {
+        profit = max(0 + getAns(Arr, ind+1, 1, n, dp), 
+                     Arr[ind] + getAns(Arr, ind+2, 0, n, dp));
+    }
+
+    return dp[ind][buy] = profit;
+}
+
+int stockProfit(vector<int> &Arr) {
+    int n = Arr.size();
+    vector<vector<int>> dp(n, vector<int>(2, -1));
+    return getAns(Arr, 0, 0, n, dp);
+}
+
+🔹 Tabulation Code
+int stockProfit(vector<int> &Arr) {
+    int n = Arr.size();
+    vector<vector<int>> dp(n+2, vector<int>(2, 0));
+
+    for (int ind = n-1; ind >= 0; ind--) {
+        for (int buy = 0; buy <= 1; buy++) {
+            if (buy == 0)
+                dp[ind][buy] = max(0 + dp[ind+1][0], -Arr[ind] + dp[ind+1][1]);
+            else
+                dp[ind][buy] = max(0 + dp[ind+1][1], Arr[ind] + dp[ind+2][0]);
+        }
+    }
+    return dp[0][0];
+}
+
+🔹 Space Optimized Code
+int stockProfit(vector<int> &Arr) {
+    int n = Arr.size();
+    vector<int> cur(2, 0), front1(2, 0), front2(2, 0);
+
+    for (int ind = n-1; ind >= 0; ind--) {
+        for (int buy = 0; buy <= 1; buy++) {
+            if (buy == 0)
+                cur[buy] = max(0 + front1[0], -Arr[ind] + front1[1]);
+            else
+                cur[buy] = max(0 + front1[1], Arr[ind] + front2[0]);
+        }
+        front2 = front1;
+        front1 = cur;
+    }
+    return cur[0];
+}
+
+🔹 Complexity
+
+Time: O(N * 2)
+
+Space:
+
+Memoization → O(N*2) + O(N) (stack)
+
+Tabulation → O(N*2)
+
+Space Optimized → O(1)
+
+🔹 Key Difference from Stock II
+
+In Stock II, after selling, we can immediately buy next day.
+
+In Stock with Cooldown, after selling, we must skip 1 day (f(ind+2,0) instead of f(ind+1,0)).
+
+
+another space optimized:
+🔹 Space Optimized Code
+
+Instead of storing a full DP table, we only need values from i+1 and i+2.
+That’s why we maintain three arrays:
+
+a1 = dp of i+1
+
+a2 = dp of i+2
+
+curr = dp of current i
+
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        vector<int> a2(2,0), a1(2,0), curr(2,0);
+        int n = prices.size();
+        
+        for(int i=n-1;i>=0;i--){
+            // buy = 1
+            curr[1] = max(-prices[i] + a1[0], a1[1]);
+            // buy = 0
+            curr[0] = max(prices[i] + a2[1], a1[0]);
+            
+            a2 = a1;
+            a1 = curr;
+        }
+        return a1[1]; // start with buy allowed
+    }
+};
+
+🔹 Why 3 Arrays?
+
+curr = current day’s states.
+
+a1 = future (i+1).
+
+a2 = future (i+2), needed because of cooldown jump after selling.
+
+So it’s a 3-pointer rolling array trick (instead of full O(N) table).
+
+🔹 Complexity
+
+Time: O(N)
+
+Space: O(1) (constant space, only 3 vectors of size 2)
