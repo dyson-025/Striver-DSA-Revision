@@ -1,0 +1,115 @@
+Problem Statement
+link: https://leetcode.com/problems/search-a-2d-matrix-ii/description/
+You are given an N x M matrix where each row and each column is sorted in non-decreasing order.
+Your task is to find whether a given target exists in the matrix.
+
+Note: The first element of a row is not necessarily greater than the last element of the previous row.
+
+Example Input:
+
+matrix = [
+  [1, 4, 7, 11, 15],
+  [2, 5, 8, 12, 19],
+  [3, 6, 9, 16, 22],
+  [10,13,14,17,24],
+  [18,21,23,26,30]
+]
+target = 14
+
+
+Output: true (14 exists at cell (3,2))
+
+Approach 1: Brute Force
+
+Traverse all elements in the matrix using nested loops.
+
+Compare each element with target.
+
+Return true if found, else false.
+
+Code (C++):
+
+bool searchElement(vector<vector<int>>& matrix, int target) {
+    int n = matrix.size(), m = matrix[0].size();
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            if (matrix[i][j] == target)
+                return true;
+    return false;
+}
+
+
+Time Complexity: O(N*M)
+Space Complexity: O(1)
+
+Approach 2: Binary Search in Each Row
+
+Each row is sorted, so you can apply binary search on each row.
+
+If target is found in any row, return true.
+
+Code (C++):
+
+bool binarySearch(vector<int>& row, int target) {
+    int low = 0, high = row.size() - 1;
+    while (low <= high) {
+        int mid = (low + high) / 2;
+        if (row[mid] == target) return true;
+        else if (row[mid] < target) low = mid + 1;
+        else high = mid - 1;
+    }
+    return false;
+}
+
+bool searchElement(vector<vector<int>>& matrix, int target) {
+    for (auto& row : matrix)
+        if (binarySearch(row, target)) return true;
+    return false;
+}
+
+
+Time Complexity: O(N * logM) (binary search on each row)
+Space Complexity: O(1)
+
+Approach 3: Optimal Approach (Staircase Search)
+
+Start from the top-right corner (0, M-1).
+
+At each step:
+
+If matrix[row][col] == target → return true
+
+If matrix[row][col] > target → move left (col--)
+
+If matrix[row][col] < target → move down (row++)
+
+Stop when out of bounds.
+
+Code (C++):
+
+bool searchElement(vector<vector<int>>& matrix, int target) {
+    int n = matrix.size(), m = matrix[0].size();
+    int row = 0, col = m - 1;
+
+    while (row < n && col >= 0) {
+        if (matrix[row][col] == target) return true;
+        else if (matrix[row][col] > target) col--;
+        else row++;
+    }
+    return false;
+}
+
+
+Time Complexity: O(N + M) (at most N+M moves)
+Space Complexity: O(1)
+
+Why it works:
+
+Each step either eliminates a row or eliminates a column, reducing the search space efficiently.
+
+✅ Summary Table
+
+Approach	Time Complexity	Space Complexity	Remarks
+Brute Force	O(N*M)	O(1)	Simple, but slow
+Binary Search	O(N*logM)	O(1)	Faster than brute force
+Staircase Search	O(N+M)	O(1)	Optimal for row & column sorted matrices
