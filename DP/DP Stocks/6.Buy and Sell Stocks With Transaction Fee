@@ -1,0 +1,140 @@
+📘 Buy and Sell Stocks With Transaction Fee (DP-40)
+ link: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/
+🔹 Problem Recap
+
+We are given an array Arr[] (length n), where each element is the stock price on day i.
+
+Rules:
+
+We can buy & sell multiple times.
+
+Must buy before selling.
+
+After selling, we can buy again (no cooldown).
+
+Each transaction has a fixed fee (fee).
+
+Important: Fee is applied when we sell, not when we buy.
+
+🔹 State Definition
+
+We track two states at every index i:
+
+buy = 0 → we can buy (haven’t bought yet).
+
+buy = 1 → we can sell (we already bought).
+
+So our DP meaning:
+
+dp[i][0] = max profit starting from day i if we can buy
+
+dp[i][1] = max profit starting from day i if we can sell
+
+🔹 Recurrence
+
+If buy = 0 (we can buy):
+
+Buy today → -Arr[i] + dp[i+1][1]
+
+Skip today → dp[i+1][0]
+
+dp[i][0] = max(-Arr[i] + dp[i+1][1], dp[i+1][0])
+
+If buy = 1 (we can sell):
+
+Sell today → Arr[i] - fee + dp[i+1][0]
+
+Skip today → dp[i+1][1]
+
+dp[i][1] = max(Arr[i] - fee + dp[i+1][0], dp[i+1][1])
+
+🔹 Base Case
+
+If i == n → no days left → return 0.
+
+🔹 Memoization Code
+int getAns(vector<int> &Arr, int ind, int buy, int n, int fee, vector<vector<int>> &dp) {
+    if (ind == n) return 0;
+
+    if (dp[ind][buy] != -1) return dp[ind][buy];
+
+    int profit;
+    if (buy == 0) { // Can buy
+        profit = max(0 + getAns(Arr, ind+1, 0, n, fee, dp),
+                     -Arr[ind] + getAns(Arr, ind+1, 1, n, fee, dp));
+    } else { // Can sell
+        profit = max(0 + getAns(Arr, ind+1, 1, n, fee, dp),
+                     Arr[ind] - fee + getAns(Arr, ind+1, 0, n, fee, dp));
+    }
+
+    return dp[ind][buy] = profit;
+}
+
+int maximumProfit(int n, int fee, vector<int> &Arr) {
+    vector<vector<int>> dp(n, vector<int>(2, -1));
+    return getAns(Arr, 0, 0, n, fee, dp);
+}
+
+🔹 Tabulation Code
+int maximumProfit(int n, int fee, vector<int>& Arr) {
+    vector<vector<int>> dp(n+1, vector<int>(2, 0));
+
+    for (int ind=n-1; ind>=0; ind--) {
+        for (int buy=0; buy<=1; buy++) {
+            if (buy == 0)
+                dp[ind][buy] = max(dp[ind+1][0], -Arr[ind] + dp[ind+1][1]);
+            else
+                dp[ind][buy] = max(dp[ind+1][1], Arr[ind] - fee + dp[ind+1][0]);
+        }
+    }
+    return dp[0][0];
+}
+
+🔹 Space Optimized Code
+int maximumProfit(int n, int fee, vector<int>& Arr) {
+    vector<int> ahead(2, 0), cur(2, 0);
+
+    for (int ind=n-1; ind>=0; ind--) {
+        cur[0] = max(ahead[0], -Arr[ind] + ahead[1]);                // buy
+        cur[1] = max(ahead[1], Arr[ind] - fee + ahead[0]);           // sell
+        ahead = cur;
+    }
+    return cur[0]; // Start with "buy allowed"
+}
+
+🔹 Complexity
+
+Time: O(N*2)
+
+Space:
+
+Memoization → O(N*2) + O(N) (stack)
+
+Tabulation → O(N*2)
+
+Space Optimized → O(1)
+
+🔹 Key Difference (vs other stock problems)
+
+In Stock II, sell profit = price + dp[i+1][0]
+
+In Stock with Fee, sell profit = price - fee + dp[i+1][0]
+
+another way to see this question:
+
+class Solution {
+public:
+    int maxProfit(vector<int>& prices, int fee) {
+        int aheadbuy=0,aheadsell=0,currbuy,currsell;
+        for(int i=prices.size()-1;i>=0;i--){
+            currbuy=max(-prices[i]+aheadsell,aheadbuy);
+            currsell=max(prices[i]+aheadbuy-fee,aheadsell);
+            aheadsell=currsell;
+            aheadbuy=currbuy;
+        }
+        return aheadbuy;
+    }
+    
+};
+
+👉 The only change is subtracting fee on sell action.
