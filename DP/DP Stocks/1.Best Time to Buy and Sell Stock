@@ -1,0 +1,115 @@
+📘 Revision Notes: Best Time to Buy and Sell Stock (DP-35)
+🔹 Problem Statement
+
+Given an array Arr[] of size n where Arr[i] is the stock price on day i.
+
+You are allowed to buy and sell only once.
+
+You must buy before you sell.
+
+Find the maximum profit possible.
+
+🔹 Intuition
+
+Profit = Selling Price − Buying Price.
+
+To maximize profit:
+
+Buy at the minimum price (so far).
+
+Sell at the maximum price (after buying day).
+
+Instead of trying all pairs (buy, sell) (which is O(N²)), we can do it in one pass:
+
+Keep track of the minimum price so far (mini).
+
+On each day i, calculate profit if sold today:
+curProfit = Arr[i] - mini.
+
+Update maxProfit whenever curProfit is better.
+
+Update mini whenever we find a new smaller price.
+
+🔹 Approach (Step-by-Step)
+
+Initialize:
+
+maxProfit = 0
+
+mini = Arr[0]
+
+Loop through prices from i = 1 to n-1:
+
+curProfit = Arr[i] - mini
+
+maxProfit = max(maxProfit, curProfit)
+
+mini = min(mini, Arr[i])
+
+Return maxProfit.
+
+🔹 Dry Run Example
+
+Input: Arr = [7,1,5,3,6,4]
+
+Day (i)	Price	mini (min price so far)	curProfit (Arr[i]-mini)	maxProfit
+0	7	7	-	0
+1	1	1	0	0
+2	5	1	5-1 = 4	4
+3	3	1	3-1 = 2	4
+4	6	1	6-1 = 5	5
+5	4	1	4-1 = 3	5
+
+✅ Maximum Profit = 5 (Buy at 1, Sell at 6)
+
+🔹 Code (C++)
+#include <bits/stdc++.h>
+using namespace std;
+
+int maximumProfit(vector<int> &Arr){
+    int maxProfit = 0;
+    int mini = Arr[0];
+
+    for(int i=1;i<Arr.size();i++){
+        int curProfit = Arr[i] - mini;
+        maxProfit = max(maxProfit, curProfit);
+        mini = min(mini, Arr[i]);
+    }
+    return maxProfit;
+}
+
+int main() {
+    vector<int> Arr = {7,1,5,3,6,4};
+    cout << "The maximum profit by selling the stock is " 
+         << maximumProfit(Arr);
+}
+
+🔹 Complexity Analysis
+
+Time Complexity:
+
+O(N), where N = number of days.
+
+One pass over the array.
+
+Space Complexity:
+
+O(1), only variables used.
+
+🔹 Key Takeaways
+
+Problem is about tracking min so far and checking profit at each step.
+
+Works because selling price is always after buying price in iteration.
+
+Greedy + single pass = Optimal solution.
+
+This is the simplest version of stock problems (only one transaction).
+
+🔥 Important Interview Tip: This problem is a building block. Variants include:
+
+Multiple transactions allowed.
+
+At most 2 transactions.
+
+With cooldown / transaction fee.
