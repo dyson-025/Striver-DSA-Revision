@@ -1,0 +1,150 @@
+📘 Number of Islands (DFS & BFS)
+ link: https://leetcode.com/problems/number-of-islands/description/
+🔹 Problem Statement
+
+You are given a 2D grid of '1's (land) and '0's (water).
+
+An island is a group of connected '1's (horizontally or vertically).
+
+Your task: count the number of islands in the grid.
+
+Example:
+
+Input:
+grid = [
+  ['1','1','0','0'],
+  ['1','0','0','1'],
+  ['0','0','1','1'],
+  ['0','0','0','0']
+]
+
+Output: 3
+Explanation: There are 3 islands.
+
+🔹 Approach
+
+Traverse the grid cell by cell.
+
+For each unvisited land cell ('1'):
+
+Start a DFS/BFS traversal.
+
+Mark all connected land cells as visited.
+
+Increment the island count.
+
+Continue until all cells are visited.
+
+🔹 Your Original DFS Code
+void dfs(vector<vector<char>>& grid, vector<vector<int>>& vis, int i, int j, int n, int m){
+    vis[i][j] = 1;
+    if(i-1>=0 && !vis[i-1][j] && grid[i-1][j]=='1') dfs(grid,vis,i-1,j,n,m);
+    if(i+1<n && !vis[i+1][j] && grid[i+1][j]=='1') dfs(grid,vis,i+1,j,n,m);
+    if(j-1>=0 && !vis[i][j-1] && grid[i][j-1]=='1') dfs(grid,vis,i,j-1,n,m);
+    if(j+1<m && !vis[i][j+1] && grid[i][j+1]=='1') dfs(grid,vis,i,j+1,n,m);
+}
+
+
+Pros: Correct, works well for small-medium grids.
+Cons:
+
+Repeated code for 4 directions.
+
+Uses extra vis array; could mark grid itself to save space.
+
+Recursion stack may overflow for very large grids.
+
+🔹 Improved DFS Version
+
+Use dx and dy arrays to simplify direction traversal.
+
+Optionally, mark visited in the grid to save space.
+
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int n = grid.size(), m = grid[0].size();
+        int count = 0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]=='1'){
+                    dfs(grid,i,j,n,m);
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    void dfs(vector<vector<char>>& grid, int i, int j, int n, int m){
+        if(i<0 || i>=n || j<0 || j>=m || grid[i][j]=='0') return;
+        grid[i][j] = '0'; // mark visited
+        int dx[4] = {-1,1,0,0};
+        int dy[4] = {0,0,-1,1};
+        for(int d=0; d<4; d++){
+            dfs(grid, i+dx[d], j+dy[d], n, m);
+        }
+    }
+};
+
+
+Improvements:
+
+Cleaner DFS traversal with loop.
+
+No separate visited array.
+
+Safe for larger grids because code is concise.
+
+🔹 BFS Alternative
+void bfs(vector<vector<char>>& grid, int i, int j, int n, int m){
+    queue<pair<int,int>> q;
+    q.push({i,j});
+    grid[i][j] = '0'; // mark visited
+
+    int dx[4] = {-1,1,0,0};
+    int dy[4] = {0,0,-1,1};
+
+    while(!q.empty()){
+        auto [x,y] = q.front(); q.pop();
+        for(int d=0; d<4; d++){
+            int nx = x + dx[d], ny = y + dy[d];
+            if(nx>=0 && nx<n && ny>=0 && ny<m && grid[nx][ny]=='1'){
+                grid[nx][ny] = '0';
+                q.push({nx,ny});
+            }
+        }
+    }
+}
+
+
+BFS avoids recursion stack overflow.
+
+Logic is identical to DFS: mark all connected land as visited.
+
+🔹 Complexity Analysis
+Approach	Time Complexity	Space Complexity
+DFS	O(n*m)	O(n*m) (recursion stack)
+BFS	O(n*m)	O(n*m) (queue)
+
+n*m = total cells in grid.
+
+Each cell is visited exactly once.
+
+🔹 Key Tips
+
+Always check bounds in grid: 0 <= i < n, 0 <= j < m.
+
+Use dx/dy arrays for 4-direction movement → cleaner and fewer bugs.
+
+For large grids, BFS is safer than DFS due to recursion depth limits.
+
+You can reuse this template for any “connected components in a grid” problem.
+
+✅ Takeaway:
+
+Your original code works perfectly for understanding DFS.
+
+Improvements make it cleaner, safer, and reusable.
+
+BFS is an equally valid alternative depending on recursion constraints.
