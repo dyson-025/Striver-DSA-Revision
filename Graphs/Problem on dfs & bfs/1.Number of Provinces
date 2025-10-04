@@ -1,0 +1,139 @@
+📘 Number of Provinces (Connected Components in Graph)
+ link: https://leetcode.com/problems/number-of-provinces/
+🔹 Problem Statement
+
+Given an undirected graph with V vertices (represented as an adjacency matrix), a province is a group of nodes that are directly or indirectly connected.
+👉 You need to find the number of provinces.
+
+🔹 Key Idea
+
+If you think of cities as graph nodes, then a province = a connected component.
+
+We just need to count how many connected components exist.
+
+Use DFS or BFS:
+
+Start from an unvisited node.
+
+Mark all nodes reachable from it as visited (this covers one province).
+
+Repeat for all unvisited nodes, increasing the province counter.
+
+🔹 Algorithm (Steps)
+
+Convert adjacency matrix → adjacency list (easier traversal).
+
+Create a visited[] array.
+
+Loop through all nodes i:
+
+If i is not visited:
+
+Run DFS/BFS from i.
+
+Increment province counter.
+
+Answer = number of DFS/BFS calls = number of provinces.
+
+🔹 Code (C++ with DFS)
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+  private:
+    void dfs(int node, vector<int> adjLs[], int vis[]) {
+        vis[node] = 1;
+        for (auto it : adjLs[node]) {
+            if (!vis[it]) dfs(it, adjLs, vis);
+        }
+    }
+  public:
+    int numProvinces(vector<vector<int>> adj, int V) {
+        // Convert adjacency matrix -> adjacency list
+        vector<int> adjLs[V];
+        for (int i = 0; i < V; i++) {
+            for (int j = 0; j < V; j++) {
+                if (adj[i][j] == 1 && i != j) {
+                    adjLs[i].push_back(j);
+                    adjLs[j].push_back(i);
+                }
+            }
+        }
+        
+        int vis[V] = {0};
+        int cnt = 0;
+        
+        for (int i = 0; i < V; i++) {
+            if (!vis[i]) {
+                cnt++;               // new province found
+                dfs(i, adjLs, vis);  // mark all its nodes
+            }
+        }
+        return cnt;
+    }
+};
+
+int main() {
+    vector<vector<int>> adj {
+        {1, 0, 1},
+        {0, 1, 0},
+        {1, 0, 1}
+    };
+
+    Solution ob;
+    cout << ob.numProvinces(adj, 3) << endl; // Output: 2
+    return 0;
+}
+
+🔹 Complexity Analysis
+
+Time Complexity:
+
+Converting adjacency matrix → list: O(V^2)
+
+DFS for all nodes: O(V + E)
+
+Total: O(V^2 + V + E) → dominated by O(V^2) since input is matrix.
+
+Space Complexity:
+
+Visited array: O(V)
+
+Recursion stack (DFS): O(V)
+
+Adjacency list: O(V + E)
+
+🔹 Example
+
+Adjacency Matrix:
+
+1 0 1
+0 1 0
+1 0 1
+
+
+Connections:
+
+Node 0 ↔ Node 2
+
+Node 1 is isolated
+
+Provinces = 2
+
+Province 1: {0, 2}
+
+Province 2: {1}
+
+🔹 Use Cases in Interviews
+
+Find connected components in social networks.
+
+Cluster detection in data.
+
+Grouping cities / computers / servers based on connectivity.
+
+✅ In simple terms:
+
+Each DFS/BFS call = discovering a new province (connected component).
+
+Answer = number of DFS/BFS calls.
