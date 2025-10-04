@@ -1,0 +1,86 @@
+Graph Data Structure – Revision Notes
+1. What is a Graph?
+
+A graph is a non-linear data structure consisting of nodes (vertices) connected by edges.
+
+Unlike linear structures (arrays, stacks, queues, linked lists), graphs can branch in multiple directions.
+
+Applications: Navigation systems (Google Maps), social networks, network analysis, electrical circuits, etc.
+
+2. Terminology
+
+Node / Vertex: Represents a data point in the graph. Numbering/order of nodes is arbitrary.
+
+Edge: Connection between two vertices. Can be directed or undirected.
+
+Pair of vertices = edge.
+
+Example: Edge between 1 and 4 → (1,4) (undirected) or <1,4> (directed).
+
+3. Types of Graphs
+
+Undirected Graph:
+
+Edges have no direction (bidirectional).
+
+Edge (u, v) = Edge (v, u)
+
+Directed Graph (Digraph):
+
+Edges have direction.
+
+Edge <u, v> ≠ Edge <v, u>
+
+Can have cycles (Directed Cyclic Graph) or no cycles (Directed Acyclic Graph, DAG).
+
+4. Cycles
+
+Cycle: A path that starts and ends at the same node.
+
+Undirected Cyclic Graph: Contains at least one cycle.
+
+Directed Acyclic Graph (DAG): No cycles.
+
+5. Path in Graph
+
+Path: Sequence of nodes where each adjacent pair is connected by an edge.
+
+Rules:
+
+Nodes in a path cannot repeat.
+
+Every consecutive node pair must have an edge.
+
+Examples:
+
+Valid: 1 → 2 → 3 → 5
+
+Invalid: 1 → 2 → 3 → 2 → 1 (node repeated)
+
+Invalid: 1 → 3 → 5 (no edge between 1 & 3)
+
+6. Degree of a Node
+
+Undirected Graph: Degree = number of edges connected to the node.
+
+Total degree of graph = 2 × Number of edges (E)
+
+Directed Graph:
+
+Indegree: Number of incoming edges.
+
+Outdegree: Number of outgoing edges.
+
+7. Edge Weight
+
+Weight: Cost associated with an edge (optional).
+
+Default weight = 1 if not specified.
+
+Example: In road networks, weight = distance or travel cost between towns A and B.
+
+✅ Key Formulas
+
+Total Degree (Undirected Graph): Σ Degree of all vertices = 2 × E
+
+Indegree + Outdegree (Directed Graph): Sum of indegrees = Sum of outdegrees = Number of edges
