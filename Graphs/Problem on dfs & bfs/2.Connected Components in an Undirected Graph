@@ -1,0 +1,166 @@
+📘 Connected Components in an Undirected Graph
+ link:https://www.geeksforgeeks.org/problems/connected-components-in-an-undirected-graph/1
+🔹 Problem Statement
+
+You are given an undirected graph with V vertices (0 to V-1) and a list of E edges.
+Two vertices u and v belong to the same connected component if there exists a path between them.
+Your task: Count the number of connected components in the graph.
+
+🔹 Examples
+Example 1:
+V = 4, edges = [[0,1],[1,2]]
+
+
+Graph looks like:
+
+0 -- 1 -- 2     3
+
+
+✅ Output: 2 (components are {0,1,2}, {3})
+
+Example 2:
+V = 7, edges = [[0,1],[1,2],[2,3],[4,5]]
+
+
+Graph looks like:
+
+0 -- 1 -- 2 -- 3     4 -- 5     6
+
+
+✅ Output: 3 (components are {0,1,2,3}, {4,5}, {6})
+
+🔹 Approach
+
+Build adjacency list from given edge list.
+
+Maintain a visited[] array.
+
+For each node i:
+
+If it’s unvisited → start a traversal (DFS or BFS).
+
+Mark all reachable nodes from i as visited.
+
+Increment component counter.
+
+At the end → counter = number of connected components.
+
+🔹 DFS Implementation
+void dfs(int node, vector<int> adj[], vector<int> &visited) {
+    visited[node] = 1;
+    for (auto nbr : adj[node]) {
+        if (!visited[nbr]) {
+            dfs(nbr, adj, visited);
+        }
+    }
+}
+
+🔹 BFS Implementation
+void bfs(int start, vector<int> adj[], vector<int> &visited) {
+    queue<int> q;
+    q.push(start);
+    visited[start] = 1;
+
+    while (!q.empty()) {
+        int node = q.front(); q.pop();
+        for (auto nbr : adj[node]) {
+            if (!visited[nbr]) {
+                visited[nbr] = 1;
+                q.push(nbr);
+            }
+        }
+    }
+}
+
+🔹 Full Combined Code (DFS + BFS)
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    // DFS function
+    void dfs(int node, vector<int> adj[], vector<int> &visited) {
+        visited[node] = 1;
+        for (auto nbr : adj[node]) {
+            if (!visited[nbr]) {
+                dfs(nbr, adj, visited);
+            }
+        }
+    }
+
+    // BFS function
+    void bfs(int start, vector<int> adj[], vector<int> &visited) {
+        queue<int> q;
+        q.push(start);
+        visited[start] = 1;
+
+        while (!q.empty()) {
+            int node = q.front(); q.pop();
+            for (auto nbr : adj[node]) {
+                if (!visited[nbr]) {
+                    visited[nbr] = 1;
+                    q.push(nbr);
+                }
+            }
+        }
+    }
+
+    // Main function to count components
+    int countComponents(int V, vector<vector<int>>& edges, bool useDFS = true) {
+        // Step 1: Build adjacency list
+        vector<int> adj[V];
+        for (auto &e : edges) {
+            adj[e[0]].push_back(e[1]);
+            adj[e[1]].push_back(e[0]);
+        }
+
+        // Step 2: Visited array
+        vector<int> visited(V, 0);
+        int components = 0;
+
+        // Step 3: Traverse all nodes
+        for (int i = 0; i < V; i++) {
+            if (!visited[i]) {
+                components++;
+                if (useDFS) dfs(i, adj, visited); // DFS
+                else bfs(i, adj, visited);       // BFS
+            }
+        }
+        return components;
+    }
+};
+
+int main() {
+    int V = 7;
+    vector<vector<int>> edges = {{0,1},{1,2},{2,3},{4,5}};
+
+    Solution sol;
+
+    cout << "Using DFS → Components = " 
+         << sol.countComponents(V, edges, true) << endl;
+
+    cout << "Using BFS → Components = " 
+         << sol.countComponents(V, edges, false) << endl;
+
+    return 0;
+}
+
+🔹 Complexity Analysis
+
+Time Complexity: O(V + E)
+
+Each vertex visited once, each edge traversed once (undirected: twice).
+
+Space Complexity: O(V + E)
+
+For adjacency list + visited array.
+
+Extra recursion stack in DFS: O(V) in worst case.
+
+Extra queue in BFS: O(V) in worst case.
+
+✅ Key Takeaway:
+
+Both DFS and BFS give the same result.
+
+Only difference is DFS uses recursion stack, BFS uses queue.
