@@ -1,0 +1,190 @@
+5.Rotten Oranges – BFS Approach
+link: https://leetcode.com/problems/rotting-oranges/
+Problem Statement
+
+You are given an m x n grid where each cell can have:
+
+0 → Empty cell
+
+1 → Fresh orange
+
+2 → Rotten orange
+
+Every minute, any fresh orange adjacent (up, down, left, right) to a rotten orange becomes rotten.
+
+Return the minimum number of minutes required to rot all fresh oranges.
+
+If it is impossible to rot all oranges, return -1.
+
+Intuition
+
+This is a multi-source BFS problem, where all initially rotten oranges act as sources.
+
+BFS ensures the minimum time because we rot oranges level by level (minute by minute).
+
+Track the time using either:
+
+A time variable stored along with each orange in the queue, or
+
+BFS levels, incrementing minutes after each level.
+
+Approach
+
+Initialize a queue to store rotten oranges with their time (minute at which they rot).
+
+Traverse the grid and push all initial rotten oranges into the queue.
+
+Perform BFS:
+
+Pop the front orange (x, y, time) from the queue.
+
+Check all 4 neighbors (up, down, left, right).
+
+If a neighbor is fresh (1):
+
+Mark it as rotten (2).
+
+Push it into the queue with time + 1.
+
+Keep track of the maximum time while processing the queue.
+
+After BFS, check if any fresh oranges (1) remain:
+
+If yes → return -1.
+
+Else → return max_time.
+
+4-Directional Movement
+vector<int> dx = {-1, +1, 0, 0};  // row changes
+vector<int> dy = {0, 0, -1, +1};  // column changes
+
+
+These arrays help traverse up, down, left, right neighbors efficiently.
+
+Your Code – Clean BFS Version
+class Solution {
+public:
+    int orangesRotting(vector<vector<int>>& grid) {
+        queue<pair<pair<int,int>,int>> rott;  // store (x,y) and time
+        int n = grid.size(), m = grid[0].size();
+
+        // Step 1: Push all initial rotten oranges
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]==2) rott.push({{i,j},0});
+            }
+        }
+
+        int ans = 0;
+        vector<int> dx = {-1,+1,0,0};
+        vector<int> dy = {0,0,-1,+1};
+
+        // Step 2: BFS
+        while(!rott.empty()){
+            int x = rott.front().first.first;
+            int y = rott.front().first.second;
+            int time = rott.front().second;
+            ans = max(ans, time);
+            rott.pop();
+
+            for(int i=0;i<4;i++){
+                int X = x + dx[i];
+                int Y = y + dy[i];
+
+                if(X >= 0 && X < n && Y >= 0 && Y < m && grid[X][Y]==1){
+                    grid[X][Y] = 2;  // rot this orange
+                    rott.push({{X,Y}, time+1});
+                }
+            }
+        }
+
+        // Step 3: Check for leftover fresh oranges
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]==1) return -1;
+            }
+        }
+
+        return ans;
+    }
+};
+
+Step-by-Step Example
+
+Input:
+
+2 1 1
+1 1 0
+0 1 1
+
+
+Step 1: Push all rotten oranges → (0,0,0)
+
+Step 2: BFS:
+
+Minute 0 → Rotten (0,0) rots (0,1) and (1,0)
+
+Minute 1 → (0,1) rots (0,2) and (1,1) etc.
+
+Step 3: Track max time → 4
+
+Step 4: Check for leftover fresh oranges → none → return 4.
+
+Time & Space Complexity
+Complexity	Explanation
+Time O(n*m)	Each cell is visited at most once.
+Space O(n*m)	Queue can store all oranges in worst-case scenario.
+Alternative Standard BFS Version (Level-Wise BFS)
+int orangesRotting(vector<vector<int>>& grid) {
+    int n = grid.size(), m = grid[0].size();
+    queue<pair<int,int>> q;
+    int fresh = 0;
+
+    // Push rotten oranges and count fresh oranges
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            if(grid[i][j]==2) q.push({i,j});
+            else if(grid[i][j]==1) fresh++;
+        }
+    }
+
+    int minutes = 0;
+    vector<int> dx = {-1,+1,0,0};
+    vector<int> dy = {0,0,-1,+1};
+
+    while(!q.empty() && fresh > 0){
+        int sz = q.size();
+        for(int i=0;i<sz;i++){
+            auto [x,y] = q.front(); q.pop();
+            for(int k=0;k<4;k++){
+                int nx = x + dx[k];
+                int ny = y + dy[k];
+                if(nx>=0 && nx<n && ny>=0 && ny<m && grid[nx][ny]==1){
+                    grid[nx][ny] = 2;
+                    q.push({nx,ny});
+                    fresh--;
+                }
+            }
+        }
+        minutes++;
+    }
+
+    return (fresh == 0) ? minutes : -1;
+}
+
+
+Difference with your code:
+
+Uses BFS level approach instead of storing time in the queue.
+
+Simpler in some cases, easier to visualize “minutes” as BFS levels.
+
+Summary Notes
+
+Problem Type: Graph, BFS, Multi-source BFS
+
+Techniques Used: Queue, BFS, 4-direction traversal
+
+Key Idea: Level-wise BFS ensures minimum minutes.
+
+Variants: DFS could be used to count connected components (not minimum time).
