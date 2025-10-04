@@ -1,0 +1,145 @@
+📘 Flood Fill Algorithm (DFS & BFS)
+link: https://leetcode.com/problems/flood-fill/
+🔹 Problem Statement
+
+Given a 2D grid (image) representing pixel values:
+
+Starting from a coordinate (sr, sc) and a newColor, perform a flood fill.
+
+Flood fill means:
+
+Change the starting pixel and all 4-directionally connected pixels of the same color to newColor.
+
+Only 4-directional adjacency (up, down, left, right) is considered.
+
+Example:
+Input:
+image = [
+  [1,1,1],
+  [1,1,0],
+  [1,0,1]
+], sr = 1, sc = 1, newColor = 2
+
+Output:
+[
+  [2,2,2],
+  [2,2,0],
+  [2,0,1]
+]
+
+🔹 Approach
+
+Get initial color of the starting pixel.
+
+DFS/BFS traversal from (sr, sc):
+
+If pixel has same initial color and is not visited/colored, change it to newColor.
+
+Traverse 4 directions: up, down, left, right.
+
+Repeat recursively (DFS) or using a queue (BFS) until all connected pixels are colored.
+
+🔹 DFS Implementation (Improved)
+
+Uses dx and dy arrays for cleaner 4-direction traversal.
+
+Creates a copy of the image (ans) to avoid modifying input.
+
+class Solution {
+private:
+    void dfs(int row, int col, vector<vector<int>>& ans,
+             vector<vector<int>>& image, int newColor, int iniColor) {
+        int n = image.size(), m = image[0].size();
+        ans[row][col] = newColor;
+
+        int dx[4] = {-1,0,1,0};
+        int dy[4] = {0,1,0,-1};
+
+        for(int d=0; d<4; d++){
+            int nr = row + dx[d], nc = col + dy[d];
+            if(nr>=0 && nr<n && nc>=0 && nc<m && image[nr][nc]==iniColor && ans[nr][nc]!=newColor){
+                dfs(nr,nc,ans,image,newColor,iniColor);
+            }
+        }
+    }
+
+public:
+    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int newColor) {
+        int iniColor = image[sr][sc];
+        if(iniColor == newColor) return image; // Optimization: no change needed
+        vector<vector<int>> ans = image;
+        dfs(sr, sc, ans, image, newColor, iniColor);
+        return ans;
+    }
+};
+
+
+Improvements:
+
+Avoids repeated DFS if newColor == iniColor.
+
+Cleaner traversal with dx/dy arrays.
+
+Uses copy of input for safe operations.
+
+🔹 BFS Implementation
+
+BFS avoids recursion stack overflow.
+
+Uses a queue to traverse level-wise.
+
+class Solution {
+public:
+    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int newColor) {
+        int n = image.size(), m = image[0].size();
+        int iniColor = image[sr][sc];
+        if(iniColor == newColor) return image;
+
+        vector<vector<int>> ans = image;
+        queue<pair<int,int>> q;
+        q.push({sr, sc});
+        ans[sr][sc] = newColor;
+
+        int dx[4] = {-1,0,1,0};
+        int dy[4] = {0,1,0,-1};
+
+        while(!q.empty()){
+            auto [x,y] = q.front(); q.pop();
+            for(int d=0; d<4; d++){
+                int nx = x + dx[d], ny = y + dy[d];
+                if(nx>=0 && nx<n && ny>=0 && ny<m && ans[nx][ny]==iniColor){
+                    ans[nx][ny] = newColor;
+                    q.push({nx,ny});
+                }
+            }
+        }
+        return ans;
+    }
+};
+
+🔹 Complexity Analysis
+Approach	Time Complexity	Space Complexity
+DFS	O(NM4) ~ O(N*M)	O(N*M) recursion stack + copy array
+BFS	O(NM4) ~ O(N*M)	O(N*M) queue + copy array
+
+N*M = total pixels in image.
+
+Each pixel is visited exactly once.
+
+🔹 Key Notes & Tips
+
+Check boundaries: 0 <= row < n, 0 <= col < m.
+
+Use dx/dy arrays for direction iteration → cleaner and less error-prone.
+
+Avoid unnecessary DFS/BFS if newColor == iniColor.
+
+BFS is preferred for large images to avoid stack overflow.
+
+Can be generalized for connected components in 2D grids (like Number of Islands).
+
+✅ Takeaway:
+
+Flood Fill is basically DFS/BFS on a grid.
+
+Core idea: treat connected pixels with the same color as a component, just like graph connected components.
