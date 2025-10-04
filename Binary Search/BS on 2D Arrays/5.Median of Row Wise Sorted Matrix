@@ -1,0 +1,157 @@
+📘 Revision Notes – Median of Row Wise Sorted Matrix
+ link: https://www.geeksforgeeks.org/dsa/implement-upper-bound/
+🔹 Problem Recap
+
+We are given a matrix of size M × N where each row is sorted in ascending order.
+
+Total elements = M × N (always odd).
+
+Task: Find the median element of all elements in the matrix.
+
+🔹 Example
+
+Matrix:
+
+1 4 9
+2 5 6
+3 8 7
+
+
+Sorted list → 1 2 3 4 5 6 7 8 9
+Median = 5.
+
+1️⃣ Brute Force Approach
+Idea
+
+Flatten the matrix → store in a linear array.
+
+Sort it.
+
+Return the middle element.
+
+Steps
+
+Traverse matrix → copy all elements into a vector.
+
+Sort the vector.
+
+Return vector[(M×N)/2].
+
+Code Snippet
+int median(vector<vector<int>> &matrix, int m, int n) {
+    vector<int> lst;
+    for (int i = 0; i < m; i++) 
+        for (int j = 0; j < n; j++) 
+            lst.push_back(matrix[i][j]);
+
+    sort(lst.begin(), lst.end());
+    return lst[(m * n) / 2];
+}
+
+Complexity
+
+Time → O(M×N) + O(M×N log(M×N))
+
+Space → O(M×N) (extra list)
+
+✅ Easy, but inefficient for large matrices.
+
+2️⃣ Optimal Approach (Binary Search)
+Core Observations
+
+Median lies between minimum element and maximum element in the matrix.
+
+Min = smallest element across first column.
+
+Max = largest element across last column.
+
+Search space = [min, max].
+
+For a number x, if it is median:
+
+Number of elements ≤ x must be greater than (M×N)/2.
+
+Since rows are sorted:
+
+We can use upper_bound on each row to count how many elements ≤ x efficiently.
+
+Algorithm
+
+Find low = min(matrix[i][0]), high = max(matrix[i][n-1]).
+
+Binary search in range [low, high].
+
+mid = (low + high)/2.
+
+Count elements ≤ mid using upper_bound in each row.
+
+If count ≤ (M×N)/2 → median must be larger → low = mid+1.
+
+Else → high = mid-1.
+
+Final answer = low.
+
+Code Snippet
+int upperBound(vector<int> &arr, int x, int n) {
+    int low = 0, high = n - 1, ans = n;
+    while (low <= high) {
+        int mid = (low + high) / 2;
+        if (arr[mid] > x) {
+            ans = mid;
+            high = mid - 1;
+        } else low = mid + 1;
+    }
+    return ans;
+}
+
+int countSmallEqual(vector<vector<int>> &matrix, int m, int n, int x) {
+    int cnt = 0;
+    for (int i = 0; i < m; i++) 
+        cnt += upperBound(matrix[i], x, n);
+    return cnt;
+}
+
+int median(vector<vector<int>> &matrix, int m, int n) {
+    int low = INT_MAX, high = INT_MIN;
+    for (int i = 0; i < m; i++) {
+        low = min(low, matrix[i][0]);
+        high = max(high, matrix[i][n-1]);
+    }
+
+    int req = (n * m) / 2;
+    while (low <= high) {
+        int mid = (low + high) / 2;
+        int smallEqual = countSmallEqual(matrix, m, n, mid);
+        if (smallEqual <= req) low = mid + 1;
+        else high = mid - 1;
+    }
+    return low;
+}
+
+Complexity
+
+Time:
+
+Binary search in range [min, max] → O(log(max-min))
+
+For each mid → count using upper_bound on each row → O(M logN)
+
+Total → O(M logN × log(max-min))
+
+Space: O(1) (no extra storage)
+
+✅ Efficient and scalable.
+
+🔹 Quick Comparison
+Approach	Time Complexity	Space Complexity	Use Case
+Brute Force	O(M×N log(M×N))	O(M×N)	Small matrices
+Optimal (Binary Search)	O(M logN × log(max-min))	O(1)	Large matrices
+🔹 Key Takeaways
+
+Always check row-wise sorted property → enables binary search.
+
+Median condition: #elements ≤ median ≥ (M×N)/2.
+
+Binary search on value range, not on indices.
+
+Use upper_bound (or manual binary search) in each row to count.
