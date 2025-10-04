@@ -1,0 +1,96 @@
+Graph Representation in C++ – Revision Notes
+1. Input Format
+
+First line: n m → number of nodes n and edges m.
+
+Next m lines: u v → edge between u and v.
+
+Undirected graph: Edge (u,v) implies (v,u) exists.
+
+Directed graph: Edge (u,v) only goes from u → v.
+
+2. Adjacency Matrix
+
+Structure: 2D array adj[n+1][n+1]
+
+adj[i][j] = 1 → edge exists; 0 → no edge
+
+Undirected graph: mark both adj[u][v] and adj[v][u]
+
+Directed graph: mark only adj[u][v]
+
+Space Complexity: O(n²) → inefficient for sparse graphs
+
+Edge check: O(1)
+
+C++ Code (Undirected Graph):
+
+int adj[n+1][n+1] = {0};
+for(int i=0; i<m; i++){
+    int u, v;
+    cin >> u >> v;
+    adj[u][v] = 1;
+    adj[v][u] = 1; // skip for directed graph
+}
+
+3. Adjacency List
+
+Structure: vector<int> adj[n+1];
+
+Stores neighbors of each node.
+
+Undirected graph: each edge stored twice → 2*E space
+
+Directed graph: each edge stored once → E space
+
+Space Complexity:
+
+Undirected: O(2E)
+
+Directed: O(E)
+
+Traversal of neighbors: O(degree)
+
+C++ Code (Undirected Graph):
+
+vector<int> adj[n+1];
+for(int i=0; i<m; i++){
+    int u, v;
+    cin >> u >> v;
+    adj[u].push_back(v);
+    adj[v].push_back(u);
+}
+
+
+C++ Code (Directed Graph):
+
+vector<int> adj[n+1];
+for(int i=0; i<m; i++){
+    int u, v;
+    cin >> u >> v;
+    adj[u].push_back(v); // only u->v
+}
+
+4. Weighted Graph
+
+Adjacency Matrix: store weights instead of 1.
+
+Adjacency List: store (neighbor, weight) pairs:
+
+vector<pair<int,int>> adj[n+1];
+adj[u].push_back({v, w}); // edge u->v with weight w
+
+
+Space Complexity:
+
+Weighted undirected: O(2E)
+
+Weighted directed: O(E)
+
+✅ Key Notes
+
+Matrix: Fast edge check, but uses O(n²) space.
+
+List: Space-efficient for sparse graphs, neighbor traversal is efficient.
+
+Weighted graph: Use pairs to store weights in adjacency lists.
