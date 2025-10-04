@@ -1,0 +1,149 @@
+📘 Depth First Search (DFS) – Notes
+🔹 Definition
+
+DFS explores a graph deeply: it goes along a path until no more unvisited neighbors remain, then backtracks.
+
+🔹 Algorithm (Steps)
+
+Choose a start node.
+
+Mark it visited and add to result.
+
+Explore each unvisited neighbor recursively.
+
+Backtrack when stuck, continue until all nodes are visited.
+
+🔹 Code (C++)
+class Solution {
+  private:
+    void dfs(int node, vector<int> adj[], int vis[], vector<int>& res) {
+        vis[node] = 1;
+        res.push_back(node);
+        for (auto it : adj[node]) {
+            if (!vis[it]) dfs(it, adj, vis, res);
+        }
+    }
+  public:
+    vector<int> dfsOfGraph(int V, vector<int> adj[]) {
+        int vis[V] = {0};
+        vector<int> res;
+        dfs(0, adj, vis, res); // assuming start=0
+        return res;
+    }
+};
+
+🔹 Complexity
+
+Time: O(N + E)
+
+Space: O(N) (recursion + visited + adjacency list)
+
+🔹 Use Cases
+
+Pathfinding in mazes, puzzles.
+
+Cycle detection in graphs.
+
+Topological sort.
+
+Tree traversals.
+
+🔹 Example
+
+Graph:
+
+0 -- 1
+| \
+2  3
+|
+4
+
+
+DFS: 0 2 4 1 3
+
+📘 Breadth First Search (BFS) – Notes
+🔹 Definition
+
+BFS explores a graph level by level using a queue (FIFO).
+
+🔹 Algorithm (Steps)
+
+Choose a start node.
+
+Mark visited and push into queue.
+
+While queue not empty:
+
+Pop front → add to result.
+
+Push all unvisited neighbors into queue.
+
+Continue until queue is empty.
+
+🔹 Code (C++)
+class Solution {
+  public:
+    vector<int> bfsOfGraph(int V, vector<int> adj[]) {
+        int vis[V] = {0};
+        vis[0] = 1;
+        queue<int> q;
+        q.push(0);
+        vector<int> bfs;
+
+        while(!q.empty()) {
+            int node = q.front(); q.pop();
+            bfs.push_back(node);
+            for (auto it : adj[node]) {
+                if (!vis[it]) {
+                    vis[it] = 1;
+                    q.push(it);
+                }
+            }
+        }
+        return bfs;
+    }
+};
+
+🔹 Complexity
+
+Time: O(N + E)
+
+Space: O(N) (queue + visited + adjacency list)
+
+🔹 Use Cases
+
+Shortest path in unweighted graphs.
+
+Level order traversal in trees.
+
+Checking bipartiteness.
+
+Spreading phenomena (e.g., virus spread, network broadcast).
+
+🔹 Example
+
+Graph:
+
+0 -- 1 -- 2
+|    |
+4    3
+
+
+BFS: 0 1 4 2 3
+
+📊 DFS vs BFS – Comparison
+Feature	DFS	BFS
+Data Structure	Recursion / Stack	Queue (FIFO)
+Traversal	Depth first (explores long paths)	Level by level
+Order Example	0 2 4 1 3	0 1 4 2 3
+Time Complexity	O(N + E)	O(N + E)
+Space Complexity	O(N) (recursion stack)	O(N) (queue)
+Path Finding	Doesn’t guarantee shortest path	Finds shortest path in unweighted graphs
+Applications	Cycle detection, Topological Sort, Backtracking problems	Shortest path, Network broadcasting, Bipartite checking
+Nature	Recursive / Backtracking	Iterative / Level-wise
+
+✅ Quick Trick for Interview:
+
+If the question involves shortest path / levels → BFS.
+
+If it involves complete exploration / recursion → DFS.
