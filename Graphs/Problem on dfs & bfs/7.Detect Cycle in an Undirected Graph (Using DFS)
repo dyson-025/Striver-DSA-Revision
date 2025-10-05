@@ -1,0 +1,193 @@
+🧩 Detect Cycle in an Undirected Graph (Using DFS)
+🔸 Difficulty: Medium
+🔸 Average Time: 20 minutes
+🔸 Pattern: Graph Traversal (DFS + Recursion)
+📘 Problem Statement
+
+Given an undirected graph with V vertices and E edges, determine whether it contains any cycle or not.
+If even one connected component has a cycle, return true (or 1).
+
+🔹 Input:
+
+V: number of vertices (0 to V-1)
+
+edges: list of pairs [u, v] representing an undirected edge
+
+🔹 Output:
+
+true / 1 → if graph contains a cycle
+
+false / 0 → otherwise
+
+🧠 Example 1:
+Input:
+V = 8, E = 7
+Output: No
+Explanation:
+No cycle in the graph.
+
+🧠 Example 2:
+Input:
+V = 8, E = 6
+Cycle: 4 → 5 → 6 → 4
+Output: Yes
+
+💡 Intuition
+
+DFS (Depth First Search) explores the graph in-depth.
+If during traversal, we encounter a node that:
+
+has already been visited, and
+
+is not the parent of the current node →
+then we have discovered a cycle.
+
+Why exclude the parent?
+Because in an undirected graph, the parent node will always be a visited node — revisiting it doesn’t mean a cycle.
+
+⚙️ Approach
+Step-by-Step Plan
+1️⃣ Build adjacency list
+
+For each edge [u, v], insert v into adj[u] and u into adj[v].
+
+2️⃣ Visited array
+
+Create a vis[V] initialized to 0.
+
+3️⃣ DFS traversal (for each component)
+
+For every unvisited node, call DFS recursively.
+
+4️⃣ DFS Function Logic
+
+Mark the node as visited.
+
+For each adjacent node:
+
+If it’s not visited, call DFS recursively.
+
+If it’s already visited and not the parent, → cycle found.
+
+Return false if no adjacent node causes a cycle.
+
+5️⃣ Return result
+
+If any component returns true, the whole graph has a cycle.
+
+🧾 Code Implementation (C++)
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+  private: 
+    bool dfs(int node, int parent, int vis[], vector<int> adj[]) {
+        vis[node] = 1; 
+        // Visit all adjacent nodes
+        for(auto adjacentNode: adj[node]) {
+            // Case 1: If adjacent is unvisited
+            if(!vis[adjacentNode]) {
+                if(dfs(adjacentNode, node, vis, adj)) 
+                    return true; 
+            }
+            // Case 2: If adjacent is visited and not parent
+            else if(adjacentNode != parent) 
+                return true; 
+        }
+        return false; 
+    }
+
+  public:
+    // Function to detect cycle in an undirected graph.
+    bool isCycle(int V, vector<int> adj[]) {
+        int vis[V] = {0};  // initialize all as unvisited
+        
+        // handle multiple components
+        for(int i = 0; i < V; i++) {
+            if(!vis[i]) {
+                if(dfs(i, -1, vis, adj)) 
+                    return true; 
+            }
+        }
+        return false; 
+    }
+};
+
+// Example usage
+int main() {
+    // Example graph
+    vector<int> adj[4] = {{}, {2}, {1, 3}, {2}};
+    Solution obj;
+    bool ans = obj.isCycle(4, adj);
+    if (ans)
+        cout << "1\n";
+    else
+        cout << "0\n";
+    return 0;
+}
+
+🔍 Dry Run Example
+Example:
+V = 4, E = 3
+edges = [[1,2], [2,3], [3,1]]
+
+
+Adjacency List:
+
+1 -> 2, 3
+2 -> 1, 3
+3 -> 2, 1
+
+DFS Steps:
+
+Start DFS(1, -1)
+
+Visit 1 → neighbors [2,3]
+
+Go to 2 → DFS(2, 1)
+
+Visit 2 → neighbors [1,3]
+
+1 is parent → ignore
+
+3 is unvisited → DFS(3, 2)
+
+Visit 3 → neighbors [2,1]
+
+2 is parent → ignore
+
+1 is visited and not parent → ✅ Cycle found
+
+🧮 Complexity Analysis
+Aspect	Explanation	Complexity
+Time Complexity	Each node and each edge is traversed once → O(V + 2E) = O(V + E)	O(V + E)
+Space Complexity	Recursion stack + visited array	O(V)
+🧠 Key Observations
+
+✅ Works for disconnected graphs (checks each component).
+✅ Uses parent to prevent false cycle detection.
+✅ DFS provides depth-based traversal, efficient for recursive checks.
+✅ Clean and elegant logic.
+
+⚡ Edge Cases
+Case	Example	Expected Output
+Single node, no edge	V=1, E=0	No
+Tree-like structure (no cycle)	edges = [[0,1],[1,2],[2,3]]	No
+Simple triangle	edges = [[0,1],[1,2],[2,0]]	Yes
+Disconnected graph with one cyclic component	edges = [[0,1],[1,2],[2,0],[3,4]]	Yes
+🧩 Comparison: BFS vs DFS
+Feature	BFS	DFS
+Traversal Type	Level-order (queue)	Depth-order (recursion)
+Parent Tracking	Stored in queue	Passed as parameter
+Recursion	❌ No	✅ Yes
+Space usage	Queue (O(V))	Recursion stack (O(V))
+Preferred for	Large shallow graphs	Deep or recursive graphs
+🏁 Final Takeaway
+
+A cycle exists in an undirected graph if during DFS traversal,
+we reach an already visited node that is not the parent.
+
+✅ Algorithm: DFS with Parent Tracking
+⏱ Time Complexity: O(V + E)
+💾 Space Complexity: O(V)
+🔹 Best for: Recursive implementations, small/medium graphs
