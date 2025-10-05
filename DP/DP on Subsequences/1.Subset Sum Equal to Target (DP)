@@ -1,0 +1,191 @@
+1.Subset Sum Equal to Target (DP)
+link: https://www.geeksforgeeks.org/problems/subset-sum-problem-1611555638/1
+Problem Statement
+
+Given an array ARR of N positive integers and a target sum K, determine if there exists a subset of ARR whose sum equals K. Return true if such a subset exists, else false.
+
+1. Understanding Subsequences / Subsets
+
+Subset/Subsequence: Any contiguous or non-contiguous selection of elements from the array in the same order.
+
+Example: ARR = [2,3,1]
+
+Subsequences: [2], [3], [1], [2,3], [2,1], [3,1], [2,3,1]
+
+[3,2] is not a subsequence (order not maintained).
+
+2. Why Greedy Doesn’t Work
+
+We are not optimizing; we just need any subset whose sum equals K.
+
+Greedy fails because choosing largest/smallest numbers first might miss valid combinations.
+
+Solution: Generate all subsequences using recursion (Pick / Non-Pick approach).
+
+3. Recursive Approach (Pick / Non-Pick)
+Step 1: Define Problem in Terms of Index
+
+Let f(ind, target) = whether a subset exists in ARR[0..ind] whose sum = target.
+
+Initially, we call f(n-1, K).
+
+Step 2: Base Cases
+
+target == 0 → subset found → return true.
+
+ind == 0 → check if ARR[0] == target. Return true if yes, else false.
+
+Step 3: Choices at Index ind
+
+Not Take: Exclude current element → f(ind-1, target)
+
+Take: Include current element if arr[ind] <= target → f(ind-1, target - arr[ind])
+
+Return: taken || notTaken
+
+Step 4: Recursive Code (C++)
+bool subsetSumUtil(int ind, int target, vector<int>& arr) {
+    if(target == 0) return true;
+    if(ind == 0) return arr[0] == target;
+
+    bool notTaken = subsetSumUtil(ind - 1, target, arr);
+    bool taken = false;
+    if(arr[ind] <= target)
+        taken = subsetSumUtil(ind - 1, target - arr[ind], arr);
+
+    return notTaken || taken;
+}
+
+
+Time Complexity: O(2^N)
+Space Complexity: O(N) recursion stack
+
+4. Memoization Approach (Top-Down DP)
+Idea
+
+Many subproblems overlap (same ind and target).
+
+Store results in a dp[ind][target] array.
+
+Implementation (C++)
+bool subsetSumUtil(int ind, int target, vector<int>& arr, vector<vector<int>>& dp) {
+    if(target == 0) return true;
+    if(ind == 0) return arr[0] == target;
+    if(dp[ind][target] != -1) return dp[ind][target];
+
+    bool notTaken = subsetSumUtil(ind-1, target, arr, dp);
+    bool taken = false;
+    if(arr[ind] <= target)
+        taken = subsetSumUtil(ind-1, target-arr[ind], arr, dp);
+
+    return dp[ind][target] = notTaken || taken;
+}
+
+bool subsetSumToK(int n, int k, vector<int>& arr) {
+    vector<vector<int>> dp(n, vector<int>(k+1, -1));
+    return subsetSumUtil(n-1, k, arr, dp);
+}
+
+
+Complexity Analysis
+
+Time: O(NK) → Ntarget states
+
+Space: O(N*K) + O(N) recursion stack
+
+5. Tabulation Approach (Bottom-Up DP)
+Idea
+
+Convert memoization to iterative approach.
+
+dp[i][t] = true if subset exists in arr[0..i] with sum t.
+
+Initialization
+
+dp[i][0] = true → sum 0 is always possible.
+
+dp[0][arr[0]] = true → first element can form a subset of its own value.
+
+Transition
+dp[ind][target] = dp[ind-1][target] || 
+                  (arr[ind] <= target ? dp[ind-1][target-arr[ind]] : false);
+
+Implementation
+bool subsetSumToK(int n, int k, vector<int> &arr) {
+    vector<vector<bool>> dp(n, vector<bool>(k+1, false));
+    for(int i=0;i<n;i++) dp[i][0] = true;
+    if(arr[0] <= k) dp[0][arr[0]] = true;
+
+    for(int ind=1; ind<n; ind++){
+        for(int target=1; target<=k; target++){
+            bool notTaken = dp[ind-1][target];
+            bool taken = (arr[ind] <= target) ? dp[ind-1][target-arr[ind]] : false;
+            dp[ind][target] = notTaken || taken;
+        }
+    }
+    return dp[n-1][k];
+}
+
+
+Complexity Analysis
+
+Time: O(N*K)
+
+Space: O(N*K)
+
+6. Space Optimization
+Observation
+
+To compute dp[ind][target], only previous row is required.
+
+Maintain prev array of size k+1 and update iteratively.
+
+Implementation
+bool subsetSumToK(int n, int k, vector<int>& arr) {
+    vector<bool> prev(k+1, false);
+    prev[0] = true;
+    if(arr[0] <= k) prev[arr[0]] = true;
+
+    for(int ind=1; ind<n; ind++){
+        vector<bool> cur(k+1, false);
+        cur[0] = true;
+        for(int target=1; target<=k; target++){
+            bool notTaken = prev[target];
+            bool taken = (arr[ind] <= target) ? prev[target-arr[ind]] : false;
+            cur[target] = notTaken || taken;
+        }
+        prev = cur;
+    }
+    return prev[k];
+}
+
+
+Complexity Analysis
+
+Time: O(N*K)
+
+Space: O(K)
+
+7. Key Points / Takeaways
+
+Pick / Non-Pick Pattern is crucial for subset/subsequence problems.
+
+Base Cases:
+
+target==0 → true
+
+ind==0 → arr[0]==target
+
+Memoization → Tabulation → Space Optimization
+
+Helps reduce recursion stack and memory usage.
+
+Time Complexity: O(N*K) for DP approaches.
+
+Space Complexity:
+
+Memoization: O(N*K)+O(N)
+
+Tabulation: O(N*K)
+
+Space Optimized: O(K)
