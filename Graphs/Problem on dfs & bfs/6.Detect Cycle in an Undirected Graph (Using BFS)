@@ -1,0 +1,170 @@
+🧩 Detect Cycle in an Undirected Graph (Using BFS)
+🔸 Difficulty: Medium
+🔸 Time to solve: ~20 mins
+🔸 Pattern: Graph Traversal (BFS)
+📘 Problem Statement
+
+Given an undirected graph with V vertices and E edges, determine if it contains any cycle or not.
+The graph may consist of multiple disconnected components.
+
+🔹 Input:
+
+V: number of vertices (0 to V-1)
+
+edges: list of pairs [u, v] denoting an undirected edge between u and v
+
+🔹 Output:
+
+true (1) → if cycle exists
+
+false (0) → if no cycle exists
+
+🧠 Example 1:
+Input:
+V = 8, E = 7
+(No cycle present)
+Output: 0
+
+🧠 Example 2:
+Input:
+V = 8, E = 6
+Cycle exists: 4 → 5 → 6 → 4
+Output: 1
+
+💡 Intuition
+
+A cycle means we can start from a node and return to the same node through a different path.
+
+In BFS traversal, we explore nodes level by level.
+If during traversal, we find a node that is already visited and is not the parent → that means we’ve arrived through another path, hence a cycle exists.
+
+⚙️ Approach
+Step-by-step plan:
+1️⃣ Build an adjacency list
+
+For each edge [u, v], add v to adj[u] and u to adj[v]
+(because it’s undirected).
+
+2️⃣ Visited array
+
+Maintain an array vis[V] initialized to 0.
+
+3️⃣ BFS traversal (for each component)
+
+For every unvisited node, perform BFS:
+
+Use a queue storing pairs {node, parent}.
+
+Initially push {src, -1} (no parent for starting node).
+
+Mark src as visited.
+
+4️⃣ BFS loop
+
+Pop the front node {node, parent} from the queue.
+
+Traverse all its adjacent nodes:
+
+If not visited, push {adjNode, node} and mark visited.
+
+If already visited and not equal to parent, → Cycle Found!
+
+5️⃣ If BFS completes for all components without detecting a cycle → return false.
+🧾 Code Implementation (C++)
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+  private:
+  bool detect(int src, vector<int> adj[], int vis[]) {
+      vis[src] = 1; 
+      queue<pair<int,int>> q; 
+      q.push({src, -1});  // (node, parent)
+      
+      while(!q.empty()) {
+          int node = q.front().first; 
+          int parent = q.front().second; 
+          q.pop(); 
+          
+          for(auto adjNode : adj[node]) {
+              if(!vis[adjNode]) {
+                  vis[adjNode] = 1; 
+                  q.push({adjNode, node}); 
+              }
+              // If visited and not the parent → cycle found
+              else if(adjNode != parent) {
+                  return true; 
+              }
+          }
+      }
+      return false; 
+  }
+
+  public:
+    bool isCycle(int V, vector<int> adj[]) {
+        int vis[V] = {0};  // visited array
+        
+        for(int i = 0; i < V; i++) {
+            if(!vis[i]) {
+                if(detect(i, adj, vis)) 
+                    return true; 
+            }
+        }
+        return false; 
+    }
+};
+
+🧮 Complexity Analysis
+Aspect	Explanation	Complexity
+Time Complexity	Each node and its adjacency list is processed once → O(V + 2E) (2E because undirected edges counted twice)	O(V + E)
+Space Complexity	Queue + visited array	O(V)
+🔍 Dry Run Example
+Graph edges:
+edges = [[4,5], [5,6], [6,4], [1,2]]
+
+
+Adjacency list:
+
+1 -> 2
+2 -> 1
+4 -> 5,6
+5 -> 4,6
+6 -> 4,5
+
+BFS Traversal:
+
+Start BFS from node 4
+→ queue = {(4, -1)}
+
+Visit 4 → push {(5,4), (6,4)}
+
+Pop 5 → see neighbor 6
+
+6 already visited and parent != 5 → ✅ Cycle detected (4–5–6–4)
+
+⚡ Key Observations
+
+✅ Works for disconnected graphs (each component checked)
+✅ Detects cycles using parent tracking
+✅ Doesn’t falsely detect parent-child connection as a cycle
+✅ Non-recursive, safe for large graphs (no stack overflow risk)
+
+🧩 Edge Cases
+Case	Example	Expected
+Single node, no edge	V=1, E=0	No cycle
+Multiple disconnected components	some cyclic, some not	Returns true
+Tree-like structure	No back edge	No cycle
+Fully connected triangle	3 nodes, 3 edges	Cycle exists
+🧠 Comparison (DFS vs BFS)
+Feature	BFS	DFS
+Implementation	Iterative (Queue)	Recursive / Stack
+Parent tracking	Stored as pair in queue	Passed as function argument
+Space use	O(V)	O(V) (recursion stack)
+Suitable for large graphs	✅ (no recursion limit)	❌ (stack overflow risk)
+🏁 Final Takeaway
+
+In an undirected graph, if during BFS traversal a node is found that has been visited and is not the parent, it implies a cycle exists.
+
+🔸 Time Complexity → O(V + E)
+🔸 Space Complexity → O(V)
+🔸 Algorithm → BFS with Parent Tracking
