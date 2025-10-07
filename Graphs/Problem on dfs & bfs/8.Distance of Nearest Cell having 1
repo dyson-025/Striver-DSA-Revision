@@ -1,0 +1,259 @@
+🧠 Problem Statement
+link: https://leetcode.com/problems/01-matrix/
+
+You are given a binary grid of size N x M consisting of 0s and 1s.
+For each cell, you need to find the distance of the nearest cell having value 1.
+
+Distance is measured using the Manhattan Distance formula:
+
+Distance=∣i1−i2∣+∣j1−j2∣
+
+Where:
+
+(i1, j1) → coordinates of current cell
+
+(i2, j2) → coordinates of the nearest 1
+
+📘 Example
+Example 1:
+
+Input:
+
+0 1 1 0
+1 1 0 0
+0 0 1 1
+
+
+Output:
+
+1 0 0 1
+0 0 1 1
+1 1 0 0
+
+
+Explanation:
+
+Cell (0,0) → nearest 1 at (0,1) → distance = 1
+
+Cell (1,2) → nearest 1 at (1,1) → distance = 1
+
+Cell (2,1) → nearest 1 at (2,2) → distance = 1
+
+💡 Intuition
+
+We need to find for each 0, how far is the nearest 1.
+
+If we start BFS from each 0 individually → O((N×M)²) → too slow ❌
+
+Instead, notice:
+
+All 1s can be considered as starting points (sources).
+
+From these sources, we can expand in all directions simultaneously (multi-source BFS).
+
+The first time a cell is reached → it’s guaranteed to be the nearest 1 (since BFS spreads level by level). ✅
+
+So, we push all 1’s initially in queue with distance = 0 and then expand to all 0’s.
+
+🧩 Approach (Step-by-Step)
+Step 1️⃣: Initialization
+
+Create:
+
+vis[n][m] → visited array (0 = not visited, 1 = visited)
+
+dist[n][m] → stores final distance for each cell
+
+queue<pair<pair<int,int>,int>> → BFS queue storing:
+
+{{row, col}, distance}
+
+Step 2️⃣: Push all 1’s initially
+
+Traverse the grid:
+
+If grid[i][j] == 1:
+
+Push {{i,j}, 0} into queue
+
+Mark vis[i][j] = 1
+
+Else:
+
+vis[i][j] = 0
+
+👉 This is called multi-source BFS initialization.
+
+Step 3️⃣: BFS Traversal
+
+While queue is not empty:
+
+Pop front cell (r, c, steps)
+
+Store dist[r][c] = steps
+
+For each of its 4 neighbors (up, right, down, left):
+
+If valid & unvisited:
+
+Mark visited
+
+Push { {nrow, ncol}, steps+1 } in queue
+
+Step 4️⃣: Direction Handling
+
+We can define directions compactly:
+
+int delrow[] = {-1, 0, +1, 0};
+int delcol[] = {0, +1, 0, -1};
+
+
+For each i in 0..3,
+nrow = row + delrow[i],
+ncol = col + delcol[i].
+
+This covers:
+➡️ Right, ⬅️ Left, ⬆️ Up, ⬇️ Down
+
+Boundary check before visiting:
+
+if(nrow >= 0 && nrow < n && ncol >= 0 && ncol < m && vis[nrow][ncol] == 0)
+
+🧮 Dry Run Example
+Input:
+0 1 0
+0 0 0
+1 0 0
+
+Step 1: Initialize queue with all 1’s
+
+Queue → [ ((0,1),0), ((2,0),0) ]
+
+Step 2: BFS traversal
+Step	Cell	Distance	Updated Cells
+1	(0,1)	0	(0,0),(1,1),(0,2) → dist=1
+2	(2,0)	0	(1,0),(2,1) → dist=1
+3	(0,0)	1	
+4	(1,1)	1	(1,2),(2,1),(0,1),(1,0)
+5	(2,1)	1	(2,2),(1,1),(2,0)
+…	...	...	...
+
+✅ Final Distances:
+
+1 0 1
+1 1 2
+0 1 2
+
+⚙️ Code (C++)
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> nearest(vector<vector<int>> grid) {
+        int n = grid.size();
+        int m = grid[0].size();
+
+        vector<vector<int>> vis(n, vector<int>(m, 0));
+        vector<vector<int>> dist(n, vector<int>(m, 0));
+        queue<pair<pair<int,int>, int>> q;
+
+        // Step 1: Multi-source initialization
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<m; j++) {
+                if(grid[i][j] == 1) {
+                    q.push({{i,j}, 0});
+                    vis[i][j] = 1;
+                }
+            }
+        }
+
+        int delrow[] = {-1, 0, +1, 0};
+        int delcol[] = {0, +1, 0, -1};
+
+        // Step 2: BFS traversal
+        while(!q.empty()) {
+            int row = q.front().first.first;
+            int col = q.front().first.second;
+            int steps = q.front().second;
+            q.pop();
+
+            dist[row][col] = steps;
+
+            for(int i=0; i<4; i++) {
+                int nrow = row + delrow[i];
+                int ncol = col + delcol[i];
+
+                if(nrow >= 0 && nrow < n && ncol >= 0 && ncol < m
+                    && vis[nrow][ncol] == 0) {
+                    vis[nrow][ncol] = 1;
+                    q.push({{nrow, ncol}, steps+1});
+                }
+            }
+        }
+        return dist;
+    }
+};
+
+int main() {
+    vector<vector<int>> grid = {
+        {0,1,1,0},
+        {1,1,0,0},
+        {0,0,1,1}
+    };
+
+    Solution obj;
+    vector<vector<int>> ans = obj.nearest(grid);
+
+    for(auto i: ans){
+        for(auto j: i)
+            cout << j << " ";
+        cout << "\n";
+    }
+}
+
+🧠 Key Points to Remember
+
+✅ Use multi-source BFS, not DFS (DFS gives wrong distances).
+✅ Start BFS from all 1’s with distance 0.
+✅ BFS ensures minimum distance (as it goes level by level).
+✅ Maintain both visited and distance matrices.
+✅ Use direction arrays for cleaner code.
+✅ Never modify the original grid while using BFS — maintain separate vis and dist.
+
+⏱️ Time Complexity (Real Estimation)
+Step	Operation	Time
+Initialization	Traverse full grid once	O(N×M)
+BFS Traversal	Each cell pushed/popped once	O(N×M)
+Neighbor Checks	4 directions per cell	O(4×N×M)
+
+Total = O(N×M + 4×N×M) ≈ O(N×M) ✅
+(Because constants are ignored in asymptotic notation.)
+
+💾 Space Complexity (Real Estimation)
+Component	Space
+Visited array	O(N×M)
+Distance array	O(N×M)
+Queue (max all cells)	O(N×M)
+
+Total = O(3×N×M) → O(N×M) ✅
+
+🚫 Common Pitfalls
+
+❌ Using DFS → gives incorrect minimum distances
+❌ Forgetting to mark vis when pushing into queue → causes repetition
+❌ Starting BFS from 0s instead of 1s
+❌ Not using a queue of pairs (need coordinates + distance)
+
+🧾 Summary for Quick Revision
+Concept	Explanation
+Type	Multi-source BFS on matrix
+Goal	Find distance to nearest 1 for every cell
+Start Points	All cells with 1
+Distance Formula	Manhattan distance
+Traversal	BFS (Level order)
+Directions	Up, Down, Left, Right
+Time Complexity	O(N × M)
+Space Complexity	O(N × M)
+Data Structures	Queue, Visited matrix, Distance matrix
+Key Property	BFS ensures minimum steps automatically
