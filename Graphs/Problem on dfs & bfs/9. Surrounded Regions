@@ -1,0 +1,253 @@
+🧩 Problem Name: Surrounded Regions (Replace O’s with X’s)
+link: https://leetcode.com/problems/surrounded-regions/
+🧠 Problem Statement
+
+Given a matrix mat of size N × M containing only 'O' and 'X',
+you must replace all 'O' that are completely surrounded by 'X' on all four sides (up, down, left, right).
+
+👉 If an 'O' is connected to a boundary 'O', it cannot be replaced, because it’s not fully surrounded.
+
+💡 Example 1
+
+Input:
+
+X X X X
+X O X X
+X O O X
+X O X X
+X X O O
+
+
+Output:
+
+X X X X
+X X X X
+X X X X
+X X X X
+X X O O
+
+
+✅ Explanation:
+Only the 'O's that are not connected to the boundary 'O' are surrounded and hence replaced.
+
+🎯 Intuition
+
+'O's on the boundary can never be surrounded, because at least one side is missing an 'X'.
+
+Any 'O' connected (directly or indirectly) to a boundary 'O' also cannot be replaced.
+
+Therefore:
+
+Start from all boundary 'O's
+
+Run DFS/BFS from each of them to mark all connected 'O's as “safe”.
+
+After traversal, any 'O' not marked safe → must be surrounded → replace it with 'X'.
+
+⚙️ Algorithm (DFS Approach)
+Step 1️⃣: Initialization
+
+Create:
+
+vis[n][m] → visited matrix (0 = unvisited, 1 = visited)
+
+Direction arrays:
+
+int delrow[] = {-1, 0, +1, 0};
+int delcol[] = {0, +1, 0, -1};
+
+Step 2️⃣: Traverse Boundary Cells
+
+For every cell on the first row, last row, first column, last column:
+
+If it’s 'O' and not visited, call DFS.
+
+This marks all connected 'O's as visited, meaning they cannot be flipped.
+
+Step 3️⃣: DFS Traversal
+
+For each 'O':
+
+Mark current cell as visited.
+
+Explore all 4 directions (up, right, down, left).
+
+If the neighbor is 'O' and unvisited → call DFS recursively.
+
+Step 4️⃣: Replace Surrounded Regions
+
+After all boundary-connected 'O's are marked safe:
+
+Traverse the matrix again.
+
+If a cell is 'O' and not visited, it means it’s fully surrounded → convert to 'X'.
+
+🔍 Visual Dry Run Example
+Input:
+X X X X
+X O O X
+X X O X
+O X X X
+
+Step 1: Boundary O’s
+
+Boundary O at (3,0) → mark safe via DFS.
+
+Step 2: DFS marking
+
+(3,0) safe
+
+No adjacent O’s, so stop.
+
+Step 3: Remaining O’s
+
+(1,1), (1,2), (2,2) are not connected to any boundary O → flip to X.
+
+Final Output:
+X X X X
+X X X X
+X X X X
+O X X X
+
+🧠 Why DFS Works Here
+
+DFS explores deeply connected components — perfect for marking groups of 'O's connected to boundary 'O's.
+Once all such “safe regions” are marked, every unvisited 'O' must be fully enclosed — hence replace it.
+
+🧮 Pseudocode
+for all boundary cells (i, j):
+    if mat[i][j] == 'O' and not visited:
+        dfs(i, j)
+
+dfs(i, j):
+    mark visited[i][j] = 1
+    for each direction (up, down, left, right):
+        if valid cell and mat[nrow][ncol] == 'O' and not visited:
+            dfs(nrow, ncol)
+
+for all cells (i, j):
+    if mat[i][j] == 'O' and not visited:
+        mat[i][j] = 'X'
+
+💻 Full C++ Code
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+private:
+    void dfs(int row, int col, vector<vector<int>> &vis, 
+             vector<vector<char>> &mat, int delrow[], int delcol[]) {
+        vis[row][col] = 1;
+        int n = mat.size();
+        int m = mat[0].size();
+
+        for(int i = 0; i < 4; i++) {
+            int nrow = row + delrow[i];
+            int ncol = col + delcol[i];
+            if(nrow >= 0 && nrow < n && ncol >= 0 && ncol < m
+               && !vis[nrow][ncol] && mat[nrow][ncol] == 'O') {
+                dfs(nrow, ncol, vis, mat, delrow, delcol);
+            }
+        }
+    }
+
+public:
+    vector<vector<char>> fill(int n, int m, vector<vector<char>> mat) {
+        vector<vector<int>> vis(n, vector<int>(m, 0));
+        int delrow[] = {-1, 0, +1, 0};
+        int delcol[] = {0, +1, 0, -1};
+
+        // Traverse 1st & last rows
+        for(int j = 0; j < m; j++) {
+            if(!vis[0][j] && mat[0][j] == 'O')
+                dfs(0, j, vis, mat, delrow, delcol);
+            if(!vis[n-1][j] && mat[n-1][j] == 'O')
+                dfs(n-1, j, vis, mat, delrow, delcol);
+        }
+
+        // Traverse 1st & last columns
+        for(int i = 0; i < n; i++) {
+            if(!vis[i][0] && mat[i][0] == 'O')
+                dfs(i, 0, vis, mat, delrow, delcol);
+            if(!vis[i][m-1] && mat[i][m-1] == 'O')
+                dfs(i, m-1, vis, mat, delrow, delcol);
+        }
+
+        // Convert unvisited 'O' → 'X'
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < m; j++) {
+                if(!vis[i][j] && mat[i][j] == 'O')
+                    mat[i][j] = 'X';
+            }
+        }
+
+        return mat;
+    }
+};
+
+int main() {
+    vector<vector<char>> mat = {
+        {'X', 'X', 'X', 'X'}, 
+        {'X', 'O', 'X', 'X'}, 
+        {'X', 'O', 'O', 'X'}, 
+        {'X', 'O', 'X', 'X'}, 
+        {'X', 'X', 'O', 'O'}
+    };
+
+    Solution ob;
+    vector<vector<char>> ans = ob.fill(5, 4, mat);
+
+    for(auto &row : ans) {
+        for(auto &ch : row) cout << ch << " ";
+        cout << "\n";
+    }
+}
+
+🧾 Output
+X X X X
+X X X X
+X X X X
+X X X X
+X X O O
+
+🕒 Real Time Complexity Analysis
+Operation	Cost
+Traversing boundaries (rows + cols)	O(N + M)
+DFS traversal	O(N × M × 4) = O(4NM)
+Final replacement traversal	O(N × M)
+
+✅ Total = O(N × M)
+(each cell visited at most once, 4 neighbors per cell = constant factor)
+
+💾 Space Complexity
+Component	Space
+vis array	O(N × M)
+DFS recursive stack (worst case)	O(N × M)
+Matrix itself	O(N × M)
+
+✅ Total = O(N × M)
+
+🧠 Key Concepts Recap
+Concept	Explanation
+Type	DFS / Connected Components in a Grid
+Goal	Replace surrounded O’s with X’s
+Idea	Boundary O’s & their connected components are safe
+Traversal	DFS (can also use BFS)
+Directions	Up, Down, Left, Right
+Start Points	Boundary O’s
+Time Complexity	O(N × M)
+Space Complexity	O(N × M)
+Important Edge Case	O’s touching the boundary stay O
+Similar Problems	Number of Islands, Flood Fill
+⚠️ Common Mistakes
+
+🚫 Replacing 'O' before marking safe ones → will corrupt DFS.
+🚫 Forgetting to start only from boundary O’s.
+🚫 Not marking visited immediately → causes infinite recursion.
+🚫 Confusing DFS (recursion) vs BFS (queue) — both valid, but DFS is simpler here.
+
+🧾 Summary for Quick Revision
+Step	Action	Purpose
+1	Mark all boundary-connected O’s as visited using DFS	Safe cells
+2	Traverse matrix	Replace unvisited O’s with X
+3	Return matrix	Final result
