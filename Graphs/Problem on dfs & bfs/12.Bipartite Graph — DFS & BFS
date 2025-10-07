@@ -1,0 +1,247 @@
+🟩 Bipartite Graph — DFS & BFS Implementation
+ link: https://leetcode.com/problems/is-graph-bipartite/
+🔹 Concept
+
+A graph is Bipartite if you can color all its vertices using only two colors (say 0 and 1) such that no two adjacent vertices have the same color.
+
+That means if we divide all vertices into two disjoint sets A and B,
+every edge connects a vertex in A to a vertex in B — not within the same set.
+
+🔹 Examples
+✅ Example 1 (Bipartite)
+0 — 1
+|    |
+3 — 2
+
+
+You can color:
+0,2 -> color 0 and 1,3 -> color 1.
+No adjacent nodes share a color → Bipartite ✅
+
+❌ Example 2 (Not Bipartite)
+0 — 1 — 2 — 0
+
+
+This is a cycle of odd length (3) → cannot be colored with 2 colors → Not Bipartite ❌
+
+🔹 Key Property
+
+A graph is Bipartite ⇔ it has no odd-length cycle.
+
+🔹 Applications
+
+Graph coloring problems
+
+Matching problems in bipartite graphs
+
+Network flow algorithms
+
+Checking validity in scheduling and partition problems
+
+🧠 Intuition
+
+We try to color the graph alternately while traversing:
+
+Start with any node and color it 0.
+
+Color all its neighbors 1.
+
+Then, color their neighbors 0, and so on.
+
+If, during traversal, any adjacent node already has the same color,
+it means there’s a conflict (odd cycle) → Not Bipartite.
+
+🔹 Approach 1: DFS Traversal
+✅ Algorithm Steps
+
+Initialize a color[] array with -1 for all vertices (uncolored).
+
+For each vertex i (in case of multiple components):
+
+If uncolored, start a DFS with color 0.
+
+In the DFS function:
+
+Assign the current color to the node.
+
+Traverse all its neighbors:
+
+If neighbor is uncolored, assign opposite color and call DFS recursively.
+
+If neighbor is already colored with the same color, return false.
+
+If DFS for all components returns true → graph is Bipartite.
+
+💻 DFS Code (C++)
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+private: 
+    bool dfs(int node, int col, int color[], vector<int> adj[]) {
+        color[node] = col; 
+        
+        for(auto it : adj[node]) {
+            if(color[it] == -1) {
+                if(dfs(it, !col, color, adj) == false)
+                    return false;
+            }
+            else if(color[it] == col)
+                return false;
+        }
+        return true;
+    }
+
+public:
+	bool isBipartite(int V, vector<int> adj[]) {
+	    int color[V];
+	    for(int i = 0; i < V; i++)
+	        color[i] = -1; 
+	    
+	    for(int i = 0; i < V; i++) {
+	        if(color[i] == -1) {
+	            if(dfs(i, 0, color, adj) == false)
+	                return false;
+	        }
+	    }
+	    return true;
+	}
+};
+
+⚙️ Time Complexity
+
+O(V + 2E) → 2E because every edge is visited twice.
+
+V for looping through all nodes.
+
+🧮 Space Complexity
+
+O(V) for:
+
+color[] array
+
+Recursion stack
+
+Adjacency list (implicit)
+
+🔹 Approach 2: BFS Traversal
+✅ Algorithm Steps
+
+Initialize color[] = -1.
+
+For each uncolored node:
+
+Assign color 0.
+
+Perform BFS:
+
+For each node popped from queue:
+
+For each neighbor:
+
+If uncolored → assign opposite color and push in queue.
+
+If colored same as current → return false.
+
+If all nodes processed successfully → Bipartite.
+
+💻 BFS Code (C++)
+#include<bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+	bool isBipartite(int V, vector<int> adj[]) {
+	    vector<int> color(V, -1);
+	    
+	    for(int start = 0; start < V; start++) {
+	        if(color[start] == -1) {
+	            queue<int> q;
+	            q.push(start);
+	            color[start] = 0;
+	            
+	            while(!q.empty()) {
+	                int node = q.front(); q.pop();
+	                
+	                for(auto it : adj[node]) {
+	                    if(color[it] == -1) {
+	                        color[it] = !color[node];
+	                        q.push(it);
+	                    }
+	                    else if(color[it] == color[node]) {
+	                        return false;
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    return true;
+	}
+};
+
+⚙️ Time Complexity
+
+O(V + 2E)
+Every vertex and edge is traversed once.
+
+🧮 Space Complexity
+
+O(V) for color array and queue.
+
+🔹 DFS vs BFS Comparison
+Feature	DFS	BFS
+Traversal Type	Depth First (Recursive)	Level-wise (Iterative)
+Data Structure	Recursion Stack	Queue
+Best For	Recursive implementation	Easier to visualize level coloring
+Space Used	Stack space + color[]	Queue + color[]
+Performance	Same Time Complexity	Same Time Complexity
+
+Both give same result and are interchangeable.
+
+🟩 Edge Cases
+
+✅ Disconnected Graph → handle using loop for all nodes
+✅ Single Node → always Bipartite
+✅ No edges → always Bipartite
+❌ Graph with Odd Cycle → Not Bipartite
+
+🔹 Example Dry Run (DFS)
+
+Graph:
+
+0 -- 1 -- 2
+|         |
+-----------
+
+
+Adjacency list:
+
+0 -> 1, 2
+1 -> 0, 2
+2 -> 0, 1
+
+
+Steps:
+
+Start from 0 → color[0] = 0
+
+Visit 1 → color[1] = 1
+
+Visit 2 from 1 → color[2] = 0
+Back to 0, 2 is already 0 → same as 0 → Not Bipartite
+
+🏁 Final Notes / Summary
+Step	BFS/DFS	Purpose
+1	Initialize color[] = -1	Track coloring
+2	Traverse each unvisited node	Handle disconnected graphs
+3	Assign color 0	Starting color
+4	Alternate colors	0 ↔ 1
+5	Check same color adjacency	Detect odd cycle
+6	Return result	True → Bipartite, False → Not
+✅ Takeaway
+
+Even cycle or no cycle → Bipartite
+
+Odd cycle → Not Bipartite
+
+DFS or BFS both work → O(V + E) time.
