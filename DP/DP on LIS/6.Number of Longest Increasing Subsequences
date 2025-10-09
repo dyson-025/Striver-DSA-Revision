@@ -1,0 +1,166 @@
+Number of Longest Increasing Subsequences (DP-47)
+link: https://leetcode.com/problems/number-of-longest-increasing-subsequence/description/
+Problem Statement
+
+Given an array arr[] of length n, count the number of Longest Increasing Subsequences (LIS).
+
+LIS: A subsequence that is strictly increasing.
+
+Goal: Count how many distinct LIS exist in the array.
+
+Example:
+
+Input: [1, 5, 4, 3, 2, 6, 7, 2]
+
+Output: 4
+
+Explanation: There are 4 LIS of maximum length.
+
+Intuition
+
+Revisit LIS problem:
+
+dp[i] = length of LIS ending at i.
+
+To count LIS, maintain another array ct[i]:
+
+ct[i] = number of LIS ending at i.
+
+For each element arr[i], check all previous elements arr[j] (j < i) such that arr[j] < arr[i] and update:
+
+Two cases:
+
+New LIS of greater length
+
+if(dp[j] + 1 > dp[i]){
+    dp[i] = dp[j] + 1;
+    ct[i] = ct[j]; // inherit the count
+}
+
+
+We append arr[i] to all LIS ending at arr[j].
+
+Reset ct[i] because previous shorter LIS are not counted.
+
+Another LIS of same length
+
+else if(dp[j] + 1 == dp[i]){
+    ct[i] += ct[j]; // sum counts
+}
+
+
+There’s an alternative LIS of the same max length, so add its count.
+
+Algorithm
+
+Initialize:
+
+dp[i] = 1, ct[i] = 1 // every element is a LIS of length 1
+
+
+Nested loop for LIS calculation:
+
+for i = 0 to n-1:
+    for j = 0 to i-1:
+        if arr[j] < arr[i]:
+            if dp[j]+1 > dp[i]: dp[i] = dp[j]+1; ct[i] = ct[j];
+            else if dp[j]+1 == dp[i]: ct[i] += ct[j];
+
+
+Find maximum LIS length:
+
+maxi = max(dp[i])
+
+
+Sum counts for all i where dp[i] == maxi:
+
+numberOfLIS = sum(ct[i] where dp[i]==maxi)
+
+Code (C++)
+#include <bits/stdc++.h>
+using namespace std;
+
+int findNumberOfLIS(vector<int>& arr) {
+    int n = arr.size();
+    vector<int> dp(n, 1); // LIS length ending at i
+    vector<int> ct(n, 1); // number of LIS ending at i
+    int maxi = 1;
+
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < i; j++) {
+            if(arr[j] < arr[i]) {
+                if(dp[j] + 1 > dp[i]) {
+                    dp[i] = dp[j] + 1;
+                    ct[i] = ct[j]; // inherit count
+                } else if(dp[j] + 1 == dp[i]) {
+                    ct[i] += ct[j]; // sum count
+                }
+            }
+        }
+        maxi = max(maxi, dp[i]);
+    }
+
+    int numberOfLIS = 0;
+    for(int i = 0; i < n; i++) {
+        if(dp[i] == maxi) numberOfLIS += ct[i];
+    }
+
+    return numberOfLIS;
+}
+
+int main() {
+    vector<int> arr = {1, 5, 4, 3, 2, 6, 7, 2};
+    cout << "The count of LIS is " << findNumberOfLIS(arr) << endl;
+}
+
+
+Output:
+
+The count of LIS is 4
+
+Time and Space Complexity
+
+Time Complexity: O(N^2) → Two nested loops for DP
+
+Space Complexity: O(N) → Two arrays of size n (dp and ct)
+
+Explanation of Mistakes in Common Implementations
+
+Mistake 1: Confusing count with length
+
+maxl = cnt[i];  // wrong
+
+
+Some codes return cnt[i] for the first occurrence of max length, but multiple indices can have the same length.
+
+Fix: Sum all ct[i] where dp[i] == max_length.
+
+Mistake 2: Updating counts incorrectly
+
+Using cnt[i] = cnt[j] + 1 instead of cnt[i] = cnt[j] for new LIS.
+
+Always inherit the previous count, do not increment by 1.
+
+Mistake 3: Using wrong comparison
+
+Only check arr[j] < arr[i] for increasing subsequence.
+
+Equality or wrong comparison leads to incorrect counts.
+
+Key Takeaways
+
+Two arrays needed:
+
+dp[i] → length of LIS ending at i
+
+ct[i] → number of LIS ending at i
+
+Two conditions inside nested loop:
+
+New longer LIS: inherit count (ct[i] = ct[j])
+
+Equal length LIS: add count (ct[i] += ct[j])
+
+After DP, sum all counts for max length LIS, do not return ct[i] directly.
+
+Dry run small examples to fully understand dp[] and ct[].
