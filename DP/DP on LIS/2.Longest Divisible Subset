@@ -1,0 +1,211 @@
+Longest Divisible Subset | DP-44
+link: https://leetcode.com/problems/largest-divisible-subset/
+Problem Understanding
+
+We are given an array of distinct integers, and we need to find the Longest Divisible Subset (LDS).
+
+Definition:
+
+A subset S of the array is divisible if for every pair (i, j) in S:
+
+𝑎
+𝑟
+𝑟
+[
+𝑖
+]
+%
+𝑎
+𝑟
+𝑟
+[
+𝑗
+]
+=
+0
+or
+𝑎
+𝑟
+𝑟
+[
+𝑗
+]
+%
+𝑎
+𝑟
+𝑟
+[
+𝑖
+]
+=
+0
+arr[i]%arr[j]=0orarr[j]%arr[i]=0
+
+Example:
+
+Input: [1, 16, 7, 8, 4]
+
+Output: [1, 4, 8, 16] (or any valid divisible subset of maximum length)
+
+Key Note:
+
+Subset vs Subsequence:
+
+Subsequence → order of elements in the original array must be maintained.
+
+Subset → order does not matter.
+
+Intuition / Approach
+Step 1: Sort the Array
+
+Sorting is crucial because if arr[i] is divisible by arr[j] and arr[j] is divisible by arr[k], then arr[i] will also be divisible by arr[k] (transitive property).
+
+Example: [1, 4, 8, 16] → sorted
+
+This makes it easier to build the divisible subset sequentially.
+
+Step 2: DP Like Longest Increasing Subsequence (LIS)
+
+We can think of this problem as a modified LIS problem:
+
+LIS condition: arr[i] > arr[j]
+
+LDS condition: arr[i] % arr[j] == 0
+
+Dynamic Programming Table:
+
+dp[i] → Length of the longest divisible subset ending at index i
+
+hash[i] → To store previous index in the subset to reconstruct the sequence
+
+Algorithm:
+
+Initialize:
+
+dp[i] = 1  // every element alone can form a subset
+hash[i] = i  // point to itself
+
+
+Iterate over i = 0 to n-1:
+
+For every j = 0 to i-1:
+
+If arr[i] % arr[j] == 0 and dp[j] + 1 > dp[i]:
+
+dp[i] = dp[j] + 1
+hash[i] = j
+
+
+Find the maximum length in dp[] and corresponding last index:
+
+int ans = max(dp[i])
+int lastIndex = i with max dp[i]
+
+
+Reconstruct the subset using hash[]:
+
+while(hash[lastIndex] != lastIndex) {
+    add arr[lastIndex] to result
+    lastIndex = hash[lastIndex]
+}
+reverse(result)  // since we traced backwards
+
+Example Walkthrough
+
+Array: [1, 16, 7, 8, 4]
+
+Step 1: Sort
+
+[1, 4, 7, 8, 16]
+
+
+Step 2: DP Table Construction
+
+i	arr[i]	dp[i]	hash[i]
+0	1	1	0
+1	4	2	0
+2	7	1	2
+3	8	3	1
+4	16	4	3
+
+Step 3: Reconstruct subset
+
+Start from lastIndex = 4 → 16
+
+hash[4] = 3 → 8
+
+hash[3] = 1 → 4
+
+hash[1] = 0 → 1
+
+Result before reversing: [16, 8, 4, 1] → Reverse → [1, 4, 8, 16]
+
+✅ This is the longest divisible subset.
+
+Code (C++)
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<int> divisibleSet(vector<int>& arr) {
+    int n = arr.size();
+    sort(arr.begin(), arr.end());
+
+    vector<int> dp(n, 1);   // length of subset ending at i
+    vector<int> hash(n);    // to reconstruct the subset
+
+    for(int i = 0; i < n; i++) hash[i] = i;
+
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < i; j++){
+            if(arr[i] % arr[j] == 0 && dp[j] + 1 > dp[i]){
+                dp[i] = dp[j] + 1;
+                hash[i] = j;
+            }
+        }
+    }
+
+    int lastIndex = max_element(dp.begin(), dp.end()) - dp.begin();
+
+    vector<int> result;
+    result.push_back(arr[lastIndex]);
+    while(hash[lastIndex] != lastIndex){
+        lastIndex = hash[lastIndex];
+        result.push_back(arr[lastIndex]);
+    }
+
+    reverse(result.begin(), result.end());
+    return result;
+}
+
+int main() {
+    vector<int> arr = {1, 16, 7, 8, 4};
+    vector<int> ans = divisibleSet(arr);
+
+    for(int x : ans) cout << x << " ";
+    return 0;
+}
+
+
+Output:
+
+1 4 8 16
+
+Complexity Analysis
+
+Time Complexity: O(n^2)
+
+Two nested loops for DP computation
+
+Space Complexity: O(n)
+
+dp[] + hash[]
+
+Key Takeaways
+
+Sorting transforms the subset problem into a sequential divisible check.
+
+This is similar to LIS but with divisibility instead of increasing order.
+
+hash[] is crucial for reconstructing the subset.
+
+Transitive property of divisibility ensures checking only the last element in DP chain is sufficient.
