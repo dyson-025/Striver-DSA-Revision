@@ -1,0 +1,135 @@
+Longest Bitonic Subsequence (DP-46)
+link: https://www.geeksforgeeks.org/problems/longest-bitonic-subsequence0824/1
+Problem Understanding
+
+We are given an array arr[] of size n.
+
+A bitonic subsequence is defined as:
+
+A subsequence that first increases and then decreases.
+
+A subsequence that only increases or only decreases is also considered bitonic.
+
+Goal: Return the length of the longest bitonic subsequence.
+
+Example:
+
+Input: [1, 11, 2, 10, 4, 5, 2, 1]
+
+Output: 6
+
+One possible longest bitonic subsequence: [1, 2, 10, 4, 2, 1]
+
+Intuition
+
+This problem is closely related to the Longest Increasing Subsequence (LIS).
+
+Idea: For each element arr[i], consider it as a pivot where the subsequence:
+
+Increasing part → arr[0..i]
+Decreasing part → arr[i..n-1]
+
+
+Compute:
+
+dp1[i] → length of LIS ending at i
+
+dp2[i] → length of LIS starting at i when reversed (which is effectively Longest Decreasing Subsequence, LDS)
+
+For pivot i, the bitonic length is:
+
+dp1[i] + dp2[i] - 1
+
+
+Subtract 1 because arr[i] is counted in both sequences.
+
+Step-by-Step Approach
+
+Compute LIS (Left → Right):
+
+dp1[i] = max(dp1[j]+1) for all j < i and arr[j] < arr[i]
+
+Compute LDS (Right → Left):
+
+Reverse the loop, dp2[i] = max(dp2[j]+1) for all j > i and arr[j] < arr[i]
+
+Calculate Bitonic Length:
+
+bitonic_length[i] = dp1[i] + dp2[i] - 1
+
+
+Return maximum among all bitonic_length[i]
+
+Code (C++)
+#include <bits/stdc++.h>
+using namespace std;
+
+int longestBitonicSequence(vector<int>& arr, int n) {
+    vector<int> dp1(n, 1); // LIS ending at i
+    vector<int> dp2(n, 1); // LDS starting at i
+
+    // Compute LIS
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < i; j++) {
+            if (arr[j] < arr[i])
+                dp1[i] = max(dp1[i], 1 + dp1[j]);
+        }
+    }
+
+    // Compute LDS (from right to left)
+    for (int i = n - 1; i >= 0; i--) {
+        for (int j = n - 1; j > i; j--) {
+            if (arr[j] < arr[i])
+                dp2[i] = max(dp2[i], 1 + dp2[j]);
+        }
+    }
+
+    int maxi = -1;
+
+    // Compute maximum bitonic subsequence length
+    for (int i = 0; i < n; i++)
+        maxi = max(maxi, dp1[i] + dp2[i] - 1);
+
+    return maxi;
+}
+
+int main() {
+    vector<int> arr = {1, 11, 2, 10, 4, 5, 2, 1};
+    int n = arr.size();
+
+    cout << "The length of the longest bitonic subsequence is " 
+         << longestBitonicSequence(arr, n) << endl;
+
+    return 0;
+}
+
+
+Output:
+
+The length of the longest bitonic subsequence is 6
+
+Time Complexity
+
+O(N^2)
+
+Two nested loops for LIS and LDS computation.
+
+Space Complexity
+
+O(N)
+
+dp1[] and dp2[] arrays of size n.
+
+Key Takeaways
+
+Treat each element as a pivot in the bitonic subsequence.
+
+Use LIS logic in both directions to calculate increasing and decreasing parts.
+
+The final length = dp1[i] + dp2[i] - 1
+
+Works for:
+
+Strictly increasing → decreasing subsequences
+
+Only increasing or only decreasing subsequences
