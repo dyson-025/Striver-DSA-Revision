@@ -1,0 +1,119 @@
+C++ Error: “reference to non-static member function must be called”
+1. What the Error Means
+
+When you see this error:
+
+error: reference to non-static member function must be called
+
+
+It means you are trying to use a member function as a regular function pointer, but non-static member functions have an implicit this pointer, so they cannot be used like normal functions.
+
+Example That Causes Error
+class Solution {
+private:
+    bool comp(string &s1, string &s2) {
+        return s1.size() < s2.size();
+    }
+public:
+    void sortWords(vector<string>& words) {
+        sort(words.begin(), words.end(), comp); // ❌ ERROR
+    }
+};
+
+
+Why it fails:
+
+comp is a non-static member function.
+
+Non-static member functions always require an object of the class to be called because of the hidden this pointer.
+
+sort() expects a regular function pointer or callable object (like a lambda), not a member function with a this pointer.
+
+2. How to Fix It
+Option 1: Make Function Static
+class Solution {
+private:
+    static bool comp(const string &s1, const string &s2) {
+        return s1.size() < s2.size();
+    }
+public:
+    void sortWords(vector<string>& words) {
+        sort(words.begin(), words.end(), comp); // ✅ works
+    }
+};
+
+
+Why it works:
+
+Static functions do not have a this pointer, so they behave like regular functions.
+
+Can be used as a function pointer.
+
+Option 2: Use a Lambda Function (Recommended)
+sort(words.begin(), words.end(), [](const string &a, const string &b){
+    return a.size() < b.size();
+});
+
+Explanation of Lambda Function
+
+A lambda function in C++ is an anonymous inline function that can be defined directly where it is needed.
+
+Syntax:
+
+[capture](parameters) -> return_type { body };
+
+
+capture: captures variables from surrounding scope (can be empty [])
+
+parameters: like function parameters
+
+return_type: optional if compiler can infer
+
+body: function code
+
+Example:
+
+auto add = [](int a, int b){ return a + b; };
+cout << add(2, 3); // prints 5
+
+
+Advantages:
+
+No need to create a separate function.
+
+Can capture local variables easily.
+
+Useful for sorting, filtering, or callbacks.
+
+Why Lambda Fixes the Error
+
+Lambda functions do not belong to a class unless you capture this.
+
+They are regular callable objects.
+
+sort() can accept them as a comparator function.
+
+So:
+
+sort(words.begin(), words.end(), [](const string &a, const string &b){
+    return a.size() < b.size();
+});
+
+
+✅ Works perfectly with sort() and avoids the “non-static member function” error.
+
+3. Summary Table
+Problem	Cause	Fix
+reference to non-static member function must be called	Using a non-static class function as a regular function pointer	1. Make function static
+2. Use a lambda function
+Non-static member functions	Have hidden this pointer, cannot be used as regular function	Same as above
+Lambda function	Anonymous, inline function	Can be passed directly to STL functions like sort, for_each
+4. Key Takeaways
+
+Non-static member functions cannot be passed directly to functions like sort because of the hidden this pointer.
+
+Static member functions behave like regular functions and can be used as function pointers.
+
+Lambda functions are a modern, flexible way to pass inline comparators to STL functions.
+
+For sorting by string length, using a lambda is the most convenient method.
