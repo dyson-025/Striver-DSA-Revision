@@ -1,0 +1,169 @@
+Longest String Chain | DP-45
+link: https://leetcode.com/problems/longest-string-chain/
+Problem Understanding
+
+We are given an array of strings words[]. The task is to find the longest string chain.
+
+Definition of a String Chain:
+
+A string chain is a sequence of strings [s1, s2, s3, ...] such that:
+
+For every consecutive pair (prev, curr) in the chain:
+curr can be formed by inserting exactly one character into prev.
+
+The first string in the chain can be any string in the array.
+
+Example:
+
+Input: ["a","b","ba","bca","bda","bdca"]
+
+Output: 4
+
+One possible chain: "a" → "ba" → "bda" → "bdca"
+
+Important Note:
+
+The character can be inserted at any position in the previous string.
+
+Unlike subsequences, sorting by length is necessary to simplify the DP approach.
+
+Intuition / Approach
+
+This problem is similar to Longest Increasing Subsequence (LIS):
+
+In LIS: We check if arr[i] > arr[j] to extend the sequence.
+
+In String Chain: We check if arr[i] can be formed by adding one character to arr[j].
+
+Step 1: Sort the Array by String Length
+
+Sorting ensures that when we process arr[i], all potential previous chain elements are before it.
+
+Step 2: Define a Compare Function
+
+compare(s1, s2) → returns true if s1 can be formed by inserting one character into s2.
+
+Implementation using Two Pointers:
+
+bool compare(string& s1, string& s2){
+    if(s1.size() != s2.size() + 1) return false;
+
+    int i = 0, j = 0;
+    while(i < s1.size()){
+        if(j < s2.size() && s1[i] == s2[j]){
+            i++; j++;
+        } else {
+            i++;  // skip the extra character in s1
+        }
+    }
+    return j == s2.size();
+}
+
+Step 3: DP Array
+
+dp[i] → length of longest chain ending at arr[i]
+
+DP Transition:
+
+for i in 0..n-1:
+    for j in 0..i-1:
+        if compare(arr[i], arr[j]):
+            dp[i] = max(dp[i], dp[j]+1)
+
+
+Keep track of maxi → maximum length found so far.
+
+Example Walkthrough
+
+Array: ["a","b","ba","bca","bda","bdca"]
+
+Step 1: Sort by length
+
+["a","b","ba","bca","bda","bdca"]
+
+
+Step 2: Build DP Table
+
+i	arr[i]	dp[i]	Chain Example
+0	"a"	1	"a"
+1	"b"	1	"b"
+2	"ba"	2	"a" → "ba"
+3	"bca"	3	"ba" → "bca"
+4	"bda"	3	"ba" → "bda"
+5	"bdca"	4	"bda" → "bdca"
+
+Maximum chain length → 4
+
+Code (C++)
+#include<bits/stdc++.h>
+using namespace std;
+
+bool compare(string& s1, string& s2){
+    if(s1.size() != s2.size() + 1) return false;
+    
+    int i = 0, j = 0;
+    while(i < s1.size()){
+        if(j < s2.size() && s1[i] == s2[j]){
+            i++; j++;
+        } else {
+            i++;
+        }
+    }
+    return j == s2.size();
+}
+
+bool comp(string& s1, string& s2){
+    return s1.size() < s2.size();
+}
+
+int longestStrChain(vector<string>& arr){
+    int n = arr.size();
+    sort(arr.begin(), arr.end(), comp);
+
+    vector<int> dp(n, 1);
+    int maxi = 1;
+
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < i; j++){
+            if(compare(arr[i], arr[j]) && dp[j]+1 > dp[i]){
+                dp[i] = dp[j] + 1;
+            }
+        }
+        maxi = max(maxi, dp[i]);
+    }
+    return maxi;
+}
+
+int main() {
+    vector<string> words = {"a","b","ba","bca","bda","bdca"};
+    cout << "The length of the longest string chain is: " << longestStrChain(words);
+}
+
+
+Output:
+
+The length of the longest string chain is: 4
+
+Complexity Analysis
+
+Time Complexity: O(N*N * l)
+
+Two nested loops → O(N^2)
+
+compare() function → O(l) (length of string)
+
+Sorting → O(N log N) (negligible compared to N^2 * l)
+
+Space Complexity: O(N)
+
+Only dp[] array of size n is used
+
+Key Takeaways
+
+Always sort strings by length for chain problems.
+
+Two-pointer technique works well to check single-character insertion/deletion.
+
+Conceptually, this is Longest Increasing Subsequence but with strings instead of numbers.
+
+DP array stores the length of chain ending at each string.
